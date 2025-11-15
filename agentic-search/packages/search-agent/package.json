@@ -1,0 +1,10 @@
+{
+  "name": "@agentic-search/search-agent",
+  "version": "1.0.0",
+  "dependencies": {
+    "@agentic-search/base-agent": "workspace:*",
+    "chromadb": "^3.1.4",
+    "zod": "^3.25.76"
+  },
+  "private": true
+}

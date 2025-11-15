@@ -1,0 +1,244 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.25
+      prettier:
+        specifier: ^3.6.2
+        version: 3.6.2
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/base-agent:
+    dependencies:
+      '@anthropic-ai/sdk':
+        specifier: ^0.68.0
+        version: 0.68.0(zod@3.25.76)
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      openai:
+        specifier: ^6.8.1
+        version: 6.9.0(zod@3.25.76)
+      uuid:
+        specifier: ^13.0.0
+        version: 13.0.0
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+      zod-to-json-schema:
+        specifier: ^3.24.6
+        version: 3.24.6(zod@3.25.76)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.0
+        version: 20.19.25
+      '@types/uuid':
+        specifier: ^11.0.0
+        version: 11.0.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
+  packages/search-agent:
+    dependencies:
+      '@agentic-search/base-agent':
+        specifier: workspace:*
+        version: link:../base-agent
+      chromadb:
+        specifier: ^3.1.4
+        version: 3.1.4
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+
+packages:
+
+  '@anthropic-ai/sdk@0.68.0':
+    resolution: {integrity: sha512-SMYAmbbiprG8k1EjEPMTwaTqssDT7Ae+jxcR5kWXiqTlbwMR2AthXtscEVWOHkRfyAV5+y3PFYTJRNa3OJWIEw==}
+    hasBin: true
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+    peerDependenciesMeta:
+      zod:
+        optional: true
+
+  '@babel/runtime@7.28.4':
+    resolution: {integrity: sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ==}
+    engines: {node: '>=6.9.0'}
+
+  '@types/node@20.19.25':
+    resolution: {integrity: sha512-ZsJzA5thDQMSQO788d7IocwwQbI8B5OPzmqNvpf3NY/+MHDAS759Wo0gd2WQeXYt5AAAQjzcrTVC6SKCuYgoCQ==}
+
+  '@types/uuid@11.0.0':
+    resolution: {integrity: sha512-HVyk8nj2m+jcFRNazzqyVKiZezyhDKrGUA3jlEcg/nZ6Ms+qHwocba1Y/AaVaznJTAM9xpdFSh+ptbNrhOGvZA==}
+    deprecated: This is a stub types definition. uuid provides its own type definitions, so you do not need this installed.
+
+  chromadb-js-bindings-darwin-arm64@1.1.0:
+    resolution: {integrity: sha512-0N2MpTdip9czfeUo3rXe17gowRiIhfv1EDNt+ycVPQe3Jna9cCqOU6PZDVIj/doNNE0ZS+jRF54tOZut/5Zwqw==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  chromadb-js-bindings-darwin-x64@1.1.0:
+    resolution: {integrity: sha512-CLyGULSb1rzJvibL6Gm9esq+PtROlxIrGFi78C7xQDeJ9pOghCyFIY+RIK1yrLdFaujXk+T7wjbyn+cJLZ/vpw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [darwin]
+
+  chromadb-js-bindings-linux-arm64-gnu@1.1.0:
+    resolution: {integrity: sha512-gUDYrWukiQY2ETsvwlzpVUI3d9mdte2qLxYqb7aBj8RKeGfsfzNnecGwx8lkmUGIlld8eWeHVrhmeAOXVfNaGw==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  chromadb-js-bindings-linux-x64-gnu@1.1.0:
+    resolution: {integrity: sha512-4WK1TgxElFjdXBtOkMgnnaB9PVcXEEVtRY3kAOSR8sZ/ZQ2gRbqc/rM2i8pc8h/jQG8oo5nMqhipEzu3UGqKaA==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  chromadb-js-bindings-win32-x64-msvc@1.1.0:
+    resolution: {integrity: sha512-yfvGagYzqUa/MSG6HoXhfa+Crznhzt0L/N6QROdPXrHxQ0kG/+4/l4rh3VvZ7zThzvpDg5ncnFesf5ryIC33ow==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  chromadb@3.1.4:
+    resolution: {integrity: sha512-MCdiYlvBR0w4mX3ED4CtDU2snOWlk6Lh/O2ERib3YNgIOKba9x+4wrU9S3IdvUgC458m/ffisJNcFDxEVw3idw==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
+    engines: {node: '>=12'}
+
+  json-schema-to-ts@3.1.1:
+    resolution: {integrity: sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==}
+    engines: {node: '>=16'}
+
+  openai@6.9.0:
+    resolution: {integrity: sha512-n2sJRYmM+xfJ0l3OfH8eNnIyv3nQY7L08gZQu3dw6wSdfPtKAk92L83M2NIP5SS8Cl/bsBBG3yKzEOjkx0O+7A==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
+  prettier@3.6.2:
+    resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
+    engines: {node: '>=14'}
+    hasBin: true
+
+  semver@7.7.3:
+    resolution: {integrity: sha512-SdsKMrI9TdgjdweUSR9MweHA4EJ8YxHn8DFaDisvhVlUOe4BF1tLD7GAj0lIqWVl+dPb/rExr0Btby5loQm20Q==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  ts-algebra@2.0.0:
+    resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
+
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
+  uuid@13.0.0:
+    resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
+
+  zod-to-json-schema@3.24.6:
+    resolution: {integrity: sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg==}
+    peerDependencies:
+      zod: ^3.24.1
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+snapshots:
+
+  '@anthropic-ai/sdk@0.68.0(zod@3.25.76)':
+    dependencies:
+      json-schema-to-ts: 3.1.1
+    optionalDependencies:
+      zod: 3.25.76
+
+  '@babel/runtime@7.28.4': {}
+
+  '@types/node@20.19.25':
+    dependencies:
+      undici-types: 6.21.0
+
+  '@types/uuid@11.0.0':
+    dependencies:
+      uuid: 13.0.0
+
+  chromadb-js-bindings-darwin-arm64@1.1.0:
+    optional: true
+
+  chromadb-js-bindings-darwin-x64@1.1.0:
+    optional: true
+
+  chromadb-js-bindings-linux-arm64-gnu@1.1.0:
+    optional: true
+
+  chromadb-js-bindings-linux-x64-gnu@1.1.0:
+    optional: true
+
+  chromadb-js-bindings-win32-x64-msvc@1.1.0:
+    optional: true
+
+  chromadb@3.1.4:
+    dependencies:
+      semver: 7.7.3
+    optionalDependencies:
+      chromadb-js-bindings-darwin-arm64: 1.1.0
+      chromadb-js-bindings-darwin-x64: 1.1.0
+      chromadb-js-bindings-linux-arm64-gnu: 1.1.0
+      chromadb-js-bindings-linux-x64-gnu: 1.1.0
+      chromadb-js-bindings-win32-x64-msvc: 1.1.0
+
+  dotenv@17.2.3: {}
+
+  json-schema-to-ts@3.1.1:
+    dependencies:
+      '@babel/runtime': 7.28.4
+      ts-algebra: 2.0.0
+
+  openai@6.9.0(zod@3.25.76):
+    optionalDependencies:
+      zod: 3.25.76
+
+  prettier@3.6.2: {}
+
+  semver@7.7.3: {}
+
+  ts-algebra@2.0.0: {}
+
+  typescript@5.9.3: {}
+
+  undici-types@6.21.0: {}
+
+  uuid@13.0.0: {}
+
+  zod-to-json-schema@3.24.6(zod@3.25.76):
+    dependencies:
+      zod: 3.25.76
+
+  zod@3.25.76: {}
