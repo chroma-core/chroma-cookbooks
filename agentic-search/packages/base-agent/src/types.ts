@@ -44,7 +44,13 @@ export abstract class Tool {
     this.id = args.id;
     this.name = args.name;
     this.description = args.description;
-    this.parameters = args.parameters;
+    this.parameters = args.parameters.extend({
+      reason: z
+        .string()
+        .describe(
+          "The reason you chose this tool, written in first person. Reference previous tool calls if they influenced your decision.",
+        ),
+    });
   }
 
   abstract execute(parameters: any): Promise<string>;

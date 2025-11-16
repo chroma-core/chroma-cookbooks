@@ -11,6 +11,7 @@ function generateQueryPlan(maxQueryPlanSize: number): string {
   - Do NOT answer the question.
   - Do NOT call tools. You only describe what the agent should do.
   - Do NOT invent specific document IDs, URLs, or unseen facts.
+  - Do NOT assume any knowledge about the corpus or the question.
   - Express each step as:
     - a clear goal (what to figure out)
     - a suggested strategy (how to search / what clues to extract / how to narrow)
@@ -82,8 +83,8 @@ function evaluateSystemPrompt(maxNewSteps: number) {
   Your job:
   - Choose the appropriate evaluation status: "continue", "finalize", or "overridePlan"
   - Use "continue" if we should proceed with the rest of the existing query plan steps in order
-  - Use "finalize" if we have enough evidence to answer the user's question
-  - Use "overridePlan" if the remaining plan is misguided or can be improved based on the evidence so far
+  - Use "finalize" ONLY if we have enough evidence to answer the user's question
+  - Use "overridePlan" if the remaining plan is misguided or can be improved based on the evidence so far. This can also be useful when the search approach so far has not yielded good results.
   - If you choose "overridePlan" you can produce a maximum of ${maxNewSteps} new steps 
   `;
 }

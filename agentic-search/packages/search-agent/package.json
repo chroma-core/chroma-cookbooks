@@ -1,6 +1,12 @@
 {
   "name": "@agentic-search/search-agent",
   "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
   "dependencies": {
     "@agentic-search/base-agent": "workspace:*",
     "chromadb": "^3.1.4",

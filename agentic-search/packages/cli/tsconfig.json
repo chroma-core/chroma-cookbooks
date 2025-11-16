@@ -3,11 +3,14 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
+    "jsx": "react-jsx",
     "paths": {
+      "@/*": ["./src/*"],
+      "@agentic-search/search-agent": ["../search-agent/src"],
       "@agentic-search/base-agent": ["../base-agent/src"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../base-agent" }]
+  "references": [{ "path": "../search-agent" }, { "path": "../base-agent" }]
 }

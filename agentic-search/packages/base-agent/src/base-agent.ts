@@ -21,7 +21,7 @@ import {
 import { LLMFactory } from "./llms";
 import { AgentError } from "./errors";
 import { AgentStatusHandler, ConsoleStatusHandler } from "./status-handler";
-import { stringifyToolArguments } from "./utils";
+import { overrideQueryPlan, stringifyToolArguments } from "./utils";
 
 export class BaseAgent {
   public static readonly MAX_QUERY_PLAN_SIZE = 10;
@@ -57,6 +57,10 @@ export class BaseAgent {
     maxQueryPlanSize = BaseAgent.MAX_QUERY_PLAN_SIZE,
     maxStepIterations = BaseAgent.MAX_STEP_ITERATIONS,
   }: BaseAgentAnswerArgs): Promise<FinalAnswer> {
+    if (maxQueryPlanSize > 1) {
+      this.statusHandler.onAssistantUpdate(`Generating a query plan...`);
+    }
+
     const queryPlan = await this.generateQueryPlan({ query, maxQueryPlanSize });
 
     const context: AgentContext = {
@@ -65,17 +69,33 @@ export class BaseAgent {
       history: [],
     };
 
+    this.statusHandler.onAssistantUpdate(`Commencing plan execution`);
+
     let stepIndex = 0;
-    while (stepIndex < context.steps.length && stepIndex < maxStepIterations) {
+    let finalized = false;
+
+    while (stepIndex < context.steps.length && stepIndex < maxQueryPlanSize) {
       const step = context.steps[stepIndex];
+
+      if (step.status === PlanStepStatus.Cancelled) {
+        stepIndex += 1;
+        continue;
+      }
+
       step.status = PlanStepStatus.InProgress;
       this.statusHandler.onQueryPlanUpdate(context.steps);
 
-      const outcome = await this.executeStep(step, context, maxStepIterations);
+      const outcome: StepOutcome = await this.executeStep(
+        step,
+        context,
+        maxStepIterations,
+      );
       context.history.push(outcome);
 
       step.status = outcome.status;
       this.statusHandler.onQueryPlanUpdate(context.steps);
+
+      this.statusHandler.onAssistantUpdate(outcome.summary);
 
       const evaluation = await this.evaluate({
         query,
@@ -83,23 +103,39 @@ export class BaseAgent {
         context,
       });
 
+      this.statusHandler.onAssistantUpdate(evaluation.reason);
+
       if (
         evaluation.status === EvaluationStatus.OverridePlan &&
         evaluation.planOverride?.length
       ) {
-        context.steps = [
-          ...context.steps.slice(0, stepIndex + 1),
-          ...evaluation.planOverride,
-        ];
+        context.steps = overrideQueryPlan({
+          queryPlan: context.steps,
+          lastExecuted: stepIndex,
+          newSteps: evaluation.planOverride,
+        });
+
         this.statusHandler.onQueryPlanUpdate(context.steps);
+        this.statusHandler.onAssistantUpdate("Updating my query plan");
       } else if (evaluation.status === EvaluationStatus.Finalize) {
+        finalized = true;
         break;
       }
 
       stepIndex += 1;
     }
 
-    this.statusHandler.onAssistantUpdate("Finalizing answer");
+    if (stepIndex < context.steps.length) {
+      context.steps = overrideQueryPlan({
+        queryPlan: context.steps,
+        lastExecuted: finalized ? stepIndex : stepIndex - 1,
+      });
+      this.statusHandler.onQueryPlanUpdate(context.steps);
+    }
+
+    this.statusHandler.onAssistantUpdate(
+      `Finalizing answer... ${!finalized ? "Exceeded query plan size" : ""}`,
+    );
 
     return await this.synthesizeFinalAnswer(query, context);
   }
@@ -171,9 +207,15 @@ export class BaseAgent {
       messages.push(...toolsResults);
     }
 
+    this.statusHandler.onAssistantUpdate("Finalizing step execution...");
+
     const outcome = await this.finalizeStep(messages);
+
     if (turn >= maxIterations) {
       outcome.status = PlanStepStatus.Timeout;
+      this.statusHandler.onAssistantUpdate(
+        "Maxed out tool calls for this step",
+      );
     }
     return outcome;
   }
@@ -206,7 +248,9 @@ export class BaseAgent {
         Object.keys(toolParams).length
           ? `, with arguments ${stringifyToolArguments(toolParams)}`
           : ""
-      }. ${reason ?? ""}`.trim(),
+      }.
+      
+      ${reason ?? ""}`.trim(),
     );
 
     try {

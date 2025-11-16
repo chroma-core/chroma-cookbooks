@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Tool } from "@agentic-search/base-agent";
 import { Collection, K, Knn, Search } from "chromadb";
-import { processRecords } from "@/src/tools/utils";
+import { processRecords } from "./utils";
 
 const parametersSchema = z.object({
   query: z
