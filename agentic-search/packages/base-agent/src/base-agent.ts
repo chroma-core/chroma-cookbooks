@@ -72,9 +72,13 @@ export class BaseAgent {
     this.statusHandler.onAssistantUpdate(`Commencing plan execution`);
 
     let stepIndex = 0;
+    let stepsCompleted = 0;
     let finalized = false;
 
-    while (stepIndex < context.steps.length && stepIndex < maxQueryPlanSize) {
+    while (
+      stepIndex < context.steps.length &&
+      stepsCompleted < maxQueryPlanSize
+    ) {
       const step = context.steps[stepIndex];
 
       if (step.status === PlanStepStatus.Cancelled) {
@@ -116,13 +120,13 @@ export class BaseAgent {
         });
 
         this.statusHandler.onQueryPlanUpdate(context.steps);
-        this.statusHandler.onAssistantUpdate("Updating my query plan");
       } else if (evaluation.status === EvaluationStatus.Finalize) {
         finalized = true;
         break;
       }
 
       stepIndex += 1;
+      stepsCompleted += 1;
     }
 
     if (stepIndex < context.steps.length) {
