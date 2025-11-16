@@ -82,11 +82,6 @@ export type PlanStep = z.infer<typeof planStepSchema>;
 
 export const queryPlanSchema = z.object({
   steps: z.array(planStepSchema).min(1),
-  summary: z
-    .string()
-    .describe(
-      "A summary of the input query only. Do not mention the query plan itself",
-    ),
 });
 
 export type QueryPlan = z.infer<typeof queryPlanSchema>;

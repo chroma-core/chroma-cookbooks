@@ -4,10 +4,14 @@ import {
   PlanStep,
 } from "@agentic-search/base-agent";
 
-function generateQueryPlan(maxQueryPlanSize: number): string {
+function generateQueryPlan(
+  maxQueryPlanSize: number,
+  initialPlanSize: number = 4,
+): string {
   return `You are an expert query planner for a multi-step search agent operating on a large corpus of documents.
   Your job: given a question text, produce a concise sequence of of steps that an external agent can follow to find the answer only by searching and reading documents from the fixed corpus.
   Rules:
+  - Steps should aim to decompose the original query into logical subqueries.
   - Do NOT answer the question.
   - Do NOT call tools. You only describe what the agent should do.
   - Do NOT invent specific document IDs, URLs, or unseen facts.
@@ -16,7 +20,7 @@ function generateQueryPlan(maxQueryPlanSize: number): string {
     - a clear goal (what to figure out)
     - a suggested strategy (how to search / what clues to extract / how to narrow)
     - Think in terms of: decompose constraints → search for candidate entities/docs → verify against all criteria → then (later, by another component) synthesize the final answer.
-    - Keep it focused: typically 4–${maxQueryPlanSize} steps, chained logically.
+    - Keep it focused: maximum ${Math.min(initialPlanSize, maxQueryPlanSize)} steps, chained logically.
     - All actions must be phrased as operations over the corpus (e.g. “search for pages mentioning…”, “read candidate documents to check…”).
   `;
 }
@@ -27,6 +31,7 @@ function executeStepSystemPrompt(): string {
   Rules:
   - Use the available tools to find relevant information for completing the current step.
   - When you have enough information, stop calling tools.
+  - When search results are repeatedly insufficient, stop calling tools.
   - Prefer concise, targeted searches over vague or huge ones.
   `;
 }

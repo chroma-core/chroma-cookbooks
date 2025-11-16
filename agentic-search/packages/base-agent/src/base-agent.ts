@@ -25,7 +25,7 @@ import { overrideQueryPlan, stringifyToolArguments } from "./utils";
 
 export class BaseAgent {
   public static readonly MAX_QUERY_PLAN_SIZE = 10;
-  public static readonly MAX_STEP_ITERATIONS = 5;
+  public static readonly MAX_STEP_ITERATIONS = 3;
   protected llmService: LLMService;
   protected prompts: AgentPrompts;
   protected tools: Tool[];
@@ -38,17 +38,17 @@ export class BaseAgent {
     this.statusHandler = statusHandler || new ConsoleStatusHandler();
   }
 
-  private static singletonQueryPlan(query: string): QueryPlan {
+  private static singletonQueryPlan(): QueryPlan {
     return {
       steps: [
         {
           id: uuidv4(),
           title: "Solving the user's query",
-          description: "I will solve the user's query",
+          description:
+            "Break the user's query into individual steps and call tools to solve them",
           status: PlanStepStatus.InProgress,
         },
       ],
-      summary: query,
     };
   }
 
@@ -65,7 +65,7 @@ export class BaseAgent {
 
     const context: AgentContext = {
       steps: [...queryPlan.steps],
-      query: queryPlan.summary,
+      query,
       history: [],
     };
 
@@ -95,15 +95,20 @@ export class BaseAgent {
         maxStepIterations,
       );
       context.history.push(outcome);
+      stepsCompleted += 1;
 
       step.status = outcome.status;
       this.statusHandler.onQueryPlanUpdate(context.steps);
 
       this.statusHandler.onAssistantUpdate(outcome.summary);
 
+      if (stepsCompleted >= maxQueryPlanSize) {
+        break;
+      }
+
       const evaluation = await this.evaluate({
         query,
-        maxNewSteps: maxQueryPlanSize - stepIndex,
+        maxNewSteps: maxQueryPlanSize - stepsCompleted - 1,
         context,
       });
 
@@ -126,7 +131,6 @@ export class BaseAgent {
       }
 
       stepIndex += 1;
-      stepsCompleted += 1;
     }
 
     if (stepIndex < context.steps.length) {
@@ -138,7 +142,7 @@ export class BaseAgent {
     }
 
     this.statusHandler.onAssistantUpdate(
-      `Finalizing answer... ${!finalized ? "Exceeded query plan size" : ""}`,
+      `Finalizing answer... ${stepsCompleted > maxQueryPlanSize ? "Exceeded query plan size" : ""}`,
     );
 
     return await this.synthesizeFinalAnswer(query, context);
@@ -156,7 +160,7 @@ export class BaseAgent {
     }
 
     if (maxQueryPlanSize <= 1) {
-      return BaseAgent.singletonQueryPlan(query);
+      return BaseAgent.singletonQueryPlan();
     }
 
     const messages: LLMMessage[] = [
@@ -267,7 +271,7 @@ export class BaseAgent {
     } catch (error) {
       return {
         role: "tool",
-        content: `Error running tool ${tool.name}${(error as Error)?.message ? (error as Error).message : ""}`,
+        content: `Error running tool ${tool.name}${(error as Error)?.message ? `: ${(error as Error).message}` : ""}`,
         toolCallID: toolCall.id,
       };
     }

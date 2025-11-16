@@ -5,6 +5,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "cli:dev": "pnpm --filter @agentic-search/cli dev"
+  },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "prettier": "^3.6.2",
