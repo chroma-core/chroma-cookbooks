@@ -3,6 +3,7 @@ import { AssistantMessage, LLMMessage, LLMService } from "./types";
 import { OpenAI } from "openai";
 import { AgentError } from "../errors";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { zodResponseFormat } from "openai/helpers/zod";
 import { Tool } from "../types";
 
 export interface OpenAIServiceConfig {
@@ -82,14 +83,7 @@ export class OpenAIService implements LLMService {
     const response = await this.client.chat.completions.parse({
       model: this.model,
       messages: OpenAIService.toOpenAIMessages(messages),
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: schemaName,
-          schema: zodToJsonSchema(schema),
-          strict: true,
-        },
-      },
+      response_format: zodResponseFormat(schema, schemaName),
     });
 
     const output = response.choices[0].message.parsed as T | null;
