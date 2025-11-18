@@ -18,3 +18,5 @@ export {
   getToolParamsSymbol,
   getStatusSymbol,
 } from "@agentic-search/base-agent";
+
+export type { ChromaToolResult, ChromaRecord } from "./tools";

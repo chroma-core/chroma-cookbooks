@@ -27,3 +27,11 @@ export type ExecutorConfig = CoreServices & {
   tools: Tool[];
   maxIterations: number;
 };
+
+export interface ToolArgs<R> {
+  id: string;
+  name: string;
+  description: string;
+  parameters: z.AnyZodObject;
+  resultSchema?: z.ZodType<R>;
+}

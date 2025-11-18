@@ -12,6 +12,7 @@ import {
   getToolParamsSymbol,
   StepOutcome,
   Evaluation,
+  ChromaToolResult,
 } from "@agentic-search/search-agent";
 
 export function useArgent({
@@ -45,6 +46,11 @@ export function useArgent({
       }) {
         const message = `I am calling ${args.toolCall.name}(${getToolParamsSymbol(args.toolParams)})\n${args.reason ? args.reason : ""}`;
         setAssistantMessages((prevMessages) => [...prevMessages, message]);
+      }
+
+      onToolResult(result: ChromaToolResult) {
+        const message = `Got ${result.records.length} records from Chroma (latency: ${result.latency})`;
+        this.onAssistantUpdate(message);
       }
 
       onStepOutcome(outcome: StepOutcome) {

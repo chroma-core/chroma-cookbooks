@@ -51,11 +51,7 @@ export class Executor extends AgentComponent {
       }
 
       const toolsResults: ToolMessage[] = await Promise.all(
-        toolCalls.map(async (call) => {
-          const result = await this.runTool(call);
-          this.statusHandler?.onToolResult?.(result);
-          return result;
-        }),
+        toolCalls.map(async (call) => await this.runTool(call)),
       );
 
       messages.push(...toolsResults);
@@ -104,9 +100,10 @@ export class Executor extends AgentComponent {
 
     try {
       const toolResult = await tool.execute(toolParams);
+      this.statusHandler?.onToolResult?.(toolResult, toolCall);
       return {
         role: "tool",
-        content: JSON.stringify(toolResult),
+        content: tool.format(toolResult),
         toolCallID: toolCall.id,
       };
     } catch (error) {

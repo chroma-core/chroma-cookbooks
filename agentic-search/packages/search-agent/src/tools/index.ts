@@ -9,3 +9,5 @@ export const searchTools = [
   SemanticSearchTool,
   RegexSearchTool,
 ];
+
+export * from "./chroma-tool";

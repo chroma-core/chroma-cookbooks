@@ -11,7 +11,7 @@ interface StatusHandlers {
     toolParams: any;
     reason?: string;
   }): void;
-  onToolResult(result: ToolMessage): void;
+  onToolResult(result: any, toolCall?: ToolCall): void;
   onStepOutcome(outcome: StepOutcome): void;
   onPlanEvaluation(evaluation: Evaluation): void;
   onFinalAnswer(answer: FinalAnswer): void;
