@@ -22,6 +22,7 @@ function generateQueryPlan(
     - Think in terms of: decompose constraints → search for candidate entities/docs → verify against all criteria → then (later, by another component) synthesize the final answer.
     - Keep it focused: maximum ${Math.min(initialPlanSize, maxQueryPlanSize)} steps, chained logically.
     - All actions must be phrased as operations over the corpus (e.g. “search for pages mentioning…”, “read candidate documents to check…”).
+   - Try to generate parallel step as much as possible. Use the "parent" field on each step to indicate it has to wait for a dependency.
   `;
 }
 
@@ -83,7 +84,7 @@ function finalizeStepPrompt() {
   return "Now finalize the current step in the plan based on your findings. Decide weather the current step's goal has been satisfied based on the evidence. If this step yields partial or full candidates to the question, state them explicitly. If there isn't enough evidence, say so.";
 }
 
-function evaluateSystemPrompt(maxNewSteps: number) {
+function evaluatePlanSystemPrompt(maxNewSteps: number) {
   return `You are an expert query planner for a multi-step search agent operating on a large corpus of documents. The user will give you the history of the plan execution with the outcome of the latest step included, the original query plan, and the original user query. 
   Your job:
   - Choose the appropriate evaluation status: "continue", "finalize", or "overridePlan"
@@ -101,16 +102,17 @@ function finalAnswerSystemPrompt() {
 export const searchAgentPrompts: AgentPrompts = {
   generateQueryPlan,
   executeStepSystemPrompt,
-  evaluateStepUserPrompt: ({
+  executeStepUserPrompt: ({
     step,
     context,
   }: {
     step: PlanStep;
     context: AgentContext;
   }) => evaluateStepUserPrompt({ step, context }),
+  evaluateStepUserPrompt,
   finalizeStepPrompt,
-  evaluateSystemPrompt,
-  evaluateUserPrompt: ({
+  evaluatePlanSystemPrompt,
+  evaluatePlanUserPrompt: ({
     query,
     context,
   }: {

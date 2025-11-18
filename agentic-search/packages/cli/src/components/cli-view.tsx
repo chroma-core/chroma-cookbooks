@@ -2,26 +2,11 @@ import React from "react";
 import { Text, Box, Newline, useInput, useApp } from "ink";
 import {
   FinalAnswer,
+  getStatusSymbol,
   PlanStep,
   PlanStepStatus,
   Query,
 } from "@agentic-search/search-agent";
-
-function getStatusSymbol(status: PlanStepStatus) {
-  switch (status) {
-    case PlanStepStatus.InProgress:
-      return "◻";
-    case PlanStepStatus.Success:
-      return "✓";
-    case PlanStepStatus.Failure:
-    case PlanStepStatus.Timeout:
-      return "ⅹ";
-    case PlanStepStatus.Cancelled:
-      return "⊘";
-    default:
-      return "・";
-  }
-}
 
 interface CLIProps {
   appStatus: string;

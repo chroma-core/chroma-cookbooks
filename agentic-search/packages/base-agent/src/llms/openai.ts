@@ -4,7 +4,7 @@ import { OpenAI } from "openai";
 import { AgentError } from "../errors";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { zodResponseFormat } from "openai/helpers/zod";
-import { Tool } from "../types";
+import { Tool } from "../components";
 
 export interface OpenAIServiceConfig {
   model: string;

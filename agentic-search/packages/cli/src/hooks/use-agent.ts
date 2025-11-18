@@ -6,9 +6,13 @@ import {
   PlanStep,
   Query,
   SearchAgent,
+  ToolCall,
+  AgentError,
+  SearchAgentStatusHandler,
+  getToolParamsSymbol,
+  StepOutcome,
+  Evaluation,
 } from "@agentic-search/search-agent";
-import { SearchAgentStatusHandler } from "@agentic-search/search-agent/src/status-handler";
-import { AgentError } from "@agentic-search/base-agent";
 
 export function useArgent({
   queryId,
@@ -34,6 +38,29 @@ export function useArgent({
         setAssistantMessages((prevMessages) => [...prevMessages, message]);
       }
 
+      onToolCall(args: {
+        toolCall: ToolCall;
+        toolParams: any;
+        reason?: string;
+      }) {
+        const message = `I am calling ${args.toolCall.name}(${getToolParamsSymbol(args.toolParams)})\n${args.reason ? args.reason : ""}`;
+        setAssistantMessages((prevMessages) => [...prevMessages, message]);
+      }
+
+      onStepOutcome(outcome: StepOutcome) {
+        setAssistantMessages((prevMessages) => [
+          ...prevMessages,
+          outcome.summary,
+        ]);
+      }
+
+      onPlanEvaluation(evaluation: Evaluation) {
+        setAssistantMessages((prevMessages) => [
+          ...prevMessages,
+          evaluation.reason,
+        ]);
+      }
+
       onQueryUpdate(query: Query) {
         setQuery(query);
       }
@@ -55,9 +82,9 @@ export function useArgent({
         statusHandler: cliStatusHandler,
       });
 
-      const finalAnswer = await agent.answerQuery({
-        queryId: queryId,
-        maxQueryPlanSize: maxPlanSize,
+      const finalAnswer = await agent.answer({
+        queryId,
+        maxPlanSize,
       });
 
       setResult(finalAnswer);

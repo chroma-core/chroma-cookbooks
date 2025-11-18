@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { OpenAIServiceConfig } from "./openai";
-import { Tool } from "../types";
+import { Tool } from "../components";
 
 export enum LLMProvider {
   OpenAI = "openai",
