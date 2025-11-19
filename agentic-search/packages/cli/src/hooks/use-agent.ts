@@ -28,6 +28,7 @@ export function useArgent({
   const [assistantMessages, setAssistantMessages] = useState<string[]>([]);
   const [result, setResult] = useState<FinalAnswer | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [displayMessages, setDisplayMessages] = useState<number>(1);
 
   useEffect(() => {
     class CLIStatusHandler implements SearchAgentStatusHandler {
@@ -46,11 +47,7 @@ export function useArgent({
       }) {
         const message = `I am calling ${args.toolCall.name}(${getToolParamsSymbol(args.toolParams)})\n${args.reason ? args.reason : ""}`;
         setAssistantMessages((prevMessages) => [...prevMessages, message]);
-      }
-
-      onToolResult(result: ChromaToolResult) {
-        const message = `Got ${result.records.length} records from Chroma (latency: ${result.latency})`;
-        this.onAssistantUpdate(message);
+        setDisplayMessages(2);
       }
 
       onStepOutcome(outcome: StepOutcome) {
@@ -58,6 +55,7 @@ export function useArgent({
           ...prevMessages,
           outcome.summary,
         ]);
+        setDisplayMessages(1);
       }
 
       onPlanEvaluation(evaluation: Evaluation) {
@@ -106,5 +104,13 @@ export function useArgent({
     });
   }, [queryId, flags]);
 
-  return { appStatus, query, queryPlan, assistantMessages, result, error };
+  return {
+    appStatus,
+    displayMessages,
+    query,
+    queryPlan,
+    assistantMessages,
+    result,
+    error,
+  };
 }

@@ -84,7 +84,7 @@ Guidelines:
       k: 60,
     });
 
-    const start = performance.now();
+    const start = Date.now();
 
     const search = new Search()
       .rank(hybridRank)
@@ -92,9 +92,10 @@ Guidelines:
       .limit(5)
       .select(K.DOCUMENT, K.METADATA);
 
-    const end = performance.now();
-
     const results = await this.collection.search(search);
+
+    const end = Date.now();
+
     return {
       records: processSearchResults(results),
       latency: `${(end - start).toFixed(2)} ms`,

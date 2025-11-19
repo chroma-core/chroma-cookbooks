@@ -37,9 +37,9 @@ export class LexicalSearchTool extends ChromaTool {
       .limit(5)
       .select(K.DOCUMENT, K.METADATA);
 
-    const start = performance.now();
+    const start = Date.now();
     const results = await this.collection.search(search);
-    const end = performance.now();
+    const end = Date.now();
 
     return {
       records: processSearchResults(results),

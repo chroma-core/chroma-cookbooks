@@ -28,7 +28,7 @@ export class SemanticSearchTool extends ChromaTool {
   public async execute(
     parameters: z.infer<typeof parametersSchema>,
   ): Promise<ChromaToolResult> {
-    const start = performance.now();
+    const start = Date.now();
 
     const results = await this.collection.query<{ doc_id: string }>({
       queryTexts: [parameters.query],
@@ -36,7 +36,7 @@ export class SemanticSearchTool extends ChromaTool {
       nResults: 5,
     });
 
-    const end = performance.now();
+    const end = Date.now();
 
     return {
       records: processSearchResults(results),
