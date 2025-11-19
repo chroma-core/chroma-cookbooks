@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { Tool } from "@agentic-search/base-agent";
 import { Collection, K, Knn, Search } from "chromadb";
-import { processRecords } from "./utils";
+import { ChromaTool, ChromaToolResult } from "./chroma-tool";
+import { processSearchResults } from "./utils";
 
 const parametersSchema = z.object({
   query: z
@@ -9,7 +9,7 @@ const parametersSchema = z.object({
     .describe("A short query comprised of keywords and/or phrases."),
 });
 
-export class LexicalSearchTool extends Tool {
+export class LexicalSearchTool extends ChromaTool {
   private collection: Collection;
 
   constructor(collection: Collection) {
@@ -25,17 +25,25 @@ export class LexicalSearchTool extends Tool {
 
   public async execute(
     parameters: z.infer<typeof parametersSchema>,
-  ): Promise<string> {
+  ): Promise<ChromaToolResult> {
     const sparseRank = Knn({
       query: parameters.query,
       key: "sparse_embedding",
     });
+
     const search = new Search()
       .rank(sparseRank)
       .where(K("query").ne(true))
       .limit(5)
       .select(K.DOCUMENT, K.METADATA);
-    const records = await this.collection.search(search);
-    return processRecords(records);
+
+    const start = Date.now();
+    const results = await this.collection.search(search);
+    const end = Date.now();
+
+    return {
+      records: processSearchResults(results),
+      latency: `${(end - start).toFixed(2)} ms`,
+    };
   }
 }

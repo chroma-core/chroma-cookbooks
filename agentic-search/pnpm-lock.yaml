@@ -95,6 +95,9 @@ importers:
       chromadb:
         specifier: ^3.1.4
         version: 3.1.4
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       zod:
         specifier: ^3.25.76
         version: 3.25.76

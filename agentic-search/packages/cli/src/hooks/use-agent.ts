@@ -6,9 +6,14 @@ import {
   PlanStep,
   Query,
   SearchAgent,
+  ToolCall,
+  AgentError,
+  SearchAgentStatusHandler,
+  getToolParamsSymbol,
+  StepOutcome,
+  Evaluation,
+  ChromaToolResult,
 } from "@agentic-search/search-agent";
-import { SearchAgentStatusHandler } from "@agentic-search/search-agent/src/status-handler";
-import { AgentError } from "@agentic-search/base-agent";
 
 export function useArgent({
   queryId,
@@ -23,6 +28,7 @@ export function useArgent({
   const [assistantMessages, setAssistantMessages] = useState<string[]>([]);
   const [result, setResult] = useState<FinalAnswer | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [displayMessages, setDisplayMessages] = useState<number>(1);
 
   useEffect(() => {
     class CLIStatusHandler implements SearchAgentStatusHandler {
@@ -32,6 +38,31 @@ export function useArgent({
 
       onAssistantUpdate(message: string) {
         setAssistantMessages((prevMessages) => [...prevMessages, message]);
+      }
+
+      onToolCall(args: {
+        toolCall: ToolCall;
+        toolParams: any;
+        reason?: string;
+      }) {
+        const message = `I am calling ${args.toolCall.name}(${getToolParamsSymbol(args.toolParams)})\n${args.reason ? args.reason : ""}`;
+        setAssistantMessages((prevMessages) => [...prevMessages, message]);
+        setDisplayMessages(2);
+      }
+
+      onStepOutcome(outcome: StepOutcome) {
+        setAssistantMessages((prevMessages) => [
+          ...prevMessages,
+          outcome.summary,
+        ]);
+        setDisplayMessages(1);
+      }
+
+      onPlanEvaluation(evaluation: Evaluation) {
+        setAssistantMessages((prevMessages) => [
+          ...prevMessages,
+          evaluation.reason,
+        ]);
       }
 
       onQueryUpdate(query: Query) {
@@ -55,9 +86,9 @@ export function useArgent({
         statusHandler: cliStatusHandler,
       });
 
-      const finalAnswer = await agent.answerQuery({
-        queryId: queryId,
-        maxQueryPlanSize: maxPlanSize,
+      const finalAnswer = await agent.answer({
+        queryId,
+        maxPlanSize,
       });
 
       setResult(finalAnswer);
@@ -73,5 +104,13 @@ export function useArgent({
     });
   }, [queryId, flags]);
 
-  return { appStatus, query, queryPlan, assistantMessages, result, error };
+  return {
+    appStatus,
+    displayMessages,
+    query,
+    queryPlan,
+    assistantMessages,
+    result,
+    error,
+  };
 }

@@ -1,351 +1,123 @@
-import { v4 as uuidv4 } from "uuid";
-import { LLMMessage, LLMService, ToolCall, ToolMessage } from "./llms";
 import {
   AgentContext,
   AgentPrompts,
   BaseAgentAnswerArgs,
   BaseAgentConfig,
-  Evaluation,
-  evaluationSchema,
-  EvaluationStatus,
-  FinalAnswer,
-  finalAnswerSchema,
-  PlanStep,
-  PlanStepStatus,
-  QueryPlan,
-  queryPlanSchema,
-  StepOutcome,
-  stepOutcomeSchema,
-  Tool,
+  CreateBaseAgentConfig,
 } from "./types";
-import { LLMFactory } from "./llms";
+import { LLMFactory, LLMService } from "./llms";
+import {
+  PlanStep,
+  QueryPlanner,
+  EvaluationStatus,
+  Evaluator,
+  FinalAnswer,
+  Executor,
+  StepOutcome,
+  Tool,
+  AgentStatusHandler,
+  CoreServices,
+} from "./components";
 import { AgentError } from "./errors";
-import { AgentStatusHandler, ConsoleStatusHandler } from "./status-handler";
-import { overrideQueryPlan, stringifyToolArguments } from "./utils";
 
 export class BaseAgent {
   public static readonly MAX_QUERY_PLAN_SIZE = 10;
   public static readonly MAX_STEP_ITERATIONS = 3;
   protected llmService: LLMService;
   protected prompts: AgentPrompts;
+  protected statusHandler?: AgentStatusHandler;
   protected tools: Tool[];
-  protected statusHandler: AgentStatusHandler;
 
-  constructor({ llmConfig, prompts, tools, statusHandler }: BaseAgentConfig) {
-    this.llmService = LLMFactory.create(llmConfig);
-    this.prompts = prompts;
+  constructor({ tools, ...services }: BaseAgentConfig) {
+    this.llmService = services.llmService;
+    this.prompts = services.prompts;
+    this.statusHandler = services.statusHandler;
     this.tools = tools;
-    this.statusHandler = statusHandler || new ConsoleStatusHandler();
   }
 
-  private static singletonQueryPlan(): QueryPlan {
+  public static async create({
+    llmConfig,
+    ...config
+  }: CreateBaseAgentConfig): Promise<BaseAgent> {
+    const llmService = await LLMFactory.create(llmConfig);
+    return new BaseAgent({ llmService, ...config });
+  }
+
+  private services(): CoreServices {
     return {
-      steps: [
-        {
-          id: uuidv4(),
-          title: "Solving the user's query",
-          description:
-            "Break the user's query into individual steps and call tools to solve them",
-          status: PlanStepStatus.InProgress,
-        },
-      ],
+      llmService: this.llmService,
+      prompts: this.prompts,
+      statusHandler: this.statusHandler,
     };
   }
 
   public async answer({
     query,
-    maxQueryPlanSize = BaseAgent.MAX_QUERY_PLAN_SIZE,
-    maxStepIterations = BaseAgent.MAX_STEP_ITERATIONS,
+    maxPlanSize = BaseAgent.MAX_QUERY_PLAN_SIZE,
+    maxIterations = BaseAgent.MAX_STEP_ITERATIONS,
   }: BaseAgentAnswerArgs): Promise<FinalAnswer> {
-    if (maxQueryPlanSize > 1) {
-      this.statusHandler.onAssistantUpdate(`Generating a query plan...`);
+    if (!query) {
+      throw new AgentError("No query was provided");
     }
 
-    const queryPlan = await this.generateQueryPlan({ query, maxQueryPlanSize });
+    const queryPlanner = await QueryPlanner.create({
+      query,
+      maxPlanSize,
+      ...this.services(),
+    });
+
+    const executor = new Executor({
+      maxIterations,
+      tools: this.tools,
+      ...this.services(),
+    });
+
+    const evaluator = new Evaluator(this.services());
 
     const context: AgentContext = {
-      steps: [...queryPlan.steps],
+      steps: queryPlanner.plan,
       query,
       history: [],
     };
 
-    this.statusHandler.onAssistantUpdate(`Commencing plan execution`);
+    for (const steps of queryPlanner) {
+      const outcomes: StepOutcome[] = await Promise.all(
+        steps.map(async (step: PlanStep) => {
+          const outcome = await executor.run({ step, context });
+          queryPlanner.updateStepsStatus({
+            steps: [step],
+            status: outcome.status,
+          });
+          return outcome;
+        }),
+      );
 
-    let stepIndex = 0;
-    let stepsCompleted = 0;
-    let finalized = false;
+      context.history.push(...outcomes);
 
-    while (
-      stepIndex < context.steps.length &&
-      stepsCompleted < maxQueryPlanSize
-    ) {
-      const step = context.steps[stepIndex];
+      if (queryPlanner.completed()) {
+        break;
+      }
 
-      if (step.status === PlanStepStatus.Cancelled) {
-        stepIndex += 1;
+      const planEvaluation = await evaluator.evaluatePlan({
+        query,
+        context,
+        maxNewSteps: queryPlanner.availableBuffer(),
+      });
+
+      if (
+        planEvaluation.status === EvaluationStatus.OverridePlan &&
+        planEvaluation.planOverride
+      ) {
+        queryPlanner.overridePlan(planEvaluation.planOverride);
         continue;
       }
 
-      step.status = PlanStepStatus.InProgress;
-      this.statusHandler.onQueryPlanUpdate(context.steps);
-
-      const outcome: StepOutcome = await this.executeStep(
-        step,
-        context,
-        maxStepIterations,
-      );
-      context.history.push(outcome);
-      stepsCompleted += 1;
-
-      step.status = outcome.status;
-      this.statusHandler.onQueryPlanUpdate(context.steps);
-
-      this.statusHandler.onAssistantUpdate(outcome.summary);
-
-      if (stepsCompleted >= maxQueryPlanSize) {
+      if (planEvaluation.status === EvaluationStatus.Finalize) {
         break;
       }
-
-      const evaluation = await this.evaluate({
-        query,
-        maxNewSteps: maxQueryPlanSize - stepsCompleted - 1,
-        context,
-      });
-
-      this.statusHandler.onAssistantUpdate(evaluation.reason);
-
-      if (
-        evaluation.status === EvaluationStatus.OverridePlan &&
-        evaluation.planOverride?.length
-      ) {
-        context.steps = overrideQueryPlan({
-          queryPlan: context.steps,
-          lastExecuted: stepIndex,
-          newSteps: evaluation.planOverride,
-        });
-
-        this.statusHandler.onQueryPlanUpdate(context.steps);
-      } else if (evaluation.status === EvaluationStatus.Finalize) {
-        finalized = true;
-        break;
-      }
-
-      stepIndex += 1;
     }
 
-    if (stepIndex < context.steps.length) {
-      context.steps = overrideQueryPlan({
-        queryPlan: context.steps,
-        lastExecuted: finalized ? stepIndex : stepIndex - 1,
-      });
-      this.statusHandler.onQueryPlanUpdate(context.steps);
-    }
-
-    this.statusHandler.onAssistantUpdate(
-      `Finalizing answer... ${stepsCompleted > maxQueryPlanSize ? "Exceeded query plan size" : ""}`,
-    );
-
-    return await this.synthesizeFinalAnswer(query, context);
-  }
-
-  private async generateQueryPlan({
-    query,
-    maxQueryPlanSize,
-  }: {
-    query: string;
-    maxQueryPlanSize: number;
-  }): Promise<QueryPlan> {
-    if (maxQueryPlanSize < 0) {
-      throw new AgentError("Max plan size should be greater than 0");
-    }
-
-    if (maxQueryPlanSize <= 1) {
-      return BaseAgent.singletonQueryPlan();
-    }
-
-    const messages: LLMMessage[] = [
-      {
-        role: "system",
-        content: this.prompts.generateQueryPlan(maxQueryPlanSize),
-      },
-      { role: "user", content: query },
-    ];
-
-    try {
-      return await this.llmService.getStructuredOutput<QueryPlan>({
-        messages,
-        schema: queryPlanSchema,
-        schemaName: "query_plan",
-      });
-    } catch (error) {
-      throw new AgentError("Failed to generate query plan", error);
-    }
-  }
-
-  private async executeStep(
-    step: PlanStep,
-    context: AgentContext,
-    maxIterations: number = 10,
-  ): Promise<StepOutcome> {
-    const messages: LLMMessage[] = [
-      { role: "system", content: this.prompts.executeStepSystemPrompt() },
-      {
-        role: "user",
-        content: this.prompts.evaluateStepUserPrompt({ step, context }),
-      },
-    ];
-
-    let turn = 0;
-    for (; turn < maxIterations; turn += 1) {
-      const toolCallResponse = await this.llmService.callTools({
-        messages,
-        tools: this.tools,
-      });
-      messages.push(toolCallResponse);
-
-      const toolCalls = toolCallResponse.toolCalls;
-      if (!toolCalls || toolCalls.length === 0) {
-        break;
-      }
-
-      const toolsResults = await Promise.all(
-        toolCalls.map((call) => this.runTool(call)),
-      );
-
-      messages.push(...toolsResults);
-    }
-
-    this.statusHandler.onAssistantUpdate("Finalizing step execution...");
-
-    const outcome = await this.finalizeStep(messages);
-
-    if (turn >= maxIterations) {
-      outcome.status = PlanStepStatus.Timeout;
-      this.statusHandler.onAssistantUpdate(
-        "Maxed out tool calls for this step",
-      );
-    }
-    return outcome;
-  }
-
-  private async runTool(toolCall: ToolCall): Promise<ToolMessage> {
-    const tool = this.getTool(toolCall.name);
-    if (!tool) {
-      return {
-        role: "tool",
-        content: `Unknown tool: ${toolCall.name}`,
-        toolCallID: toolCall.id,
-      };
-    }
-
-    let parsed: any;
-    try {
-      parsed = tool.parameters.parse(JSON.parse(toolCall.arguments));
-    } catch (error) {
-      return {
-        role: "tool",
-        content: `Invalid arguments for tool ${tool.name}`,
-        toolCallID: toolCall.id,
-      };
-    }
-
-    const { reason, ...toolParams } = parsed ?? {};
-
-    this.statusHandler?.onAssistantUpdate(
-      `I am calling ${toolCall.name}${
-        Object.keys(toolParams).length
-          ? `, with arguments ${stringifyToolArguments(toolParams)}`
-          : ""
-      }.
-      
-      ${reason ?? ""}`.trim(),
-    );
-
-    try {
-      const toolResult = await tool.execute(toolParams);
-      return {
-        role: "tool",
-        content: JSON.stringify(toolResult),
-        toolCallID: toolCall.id,
-      };
-    } catch (error) {
-      return {
-        role: "tool",
-        content: `Error running tool ${tool.name}${(error as Error)?.message ? `: ${(error as Error).message}` : ""}`,
-        toolCallID: toolCall.id,
-      };
-    }
-  }
-
-  private getTool(toolId: string) {
-    return this.tools.find((tool) => tool.id === toolId);
-  }
-
-  private async finalizeStep(messages: LLMMessage[]): Promise<StepOutcome> {
-    messages.push({
-      role: "user",
-      content: this.prompts.finalizeStepPrompt(),
-    });
-
-    try {
-      return await this.llmService.getStructuredOutput<StepOutcome>({
-        messages,
-        schema: stepOutcomeSchema,
-        schemaName: "step_outcome",
-      });
-    } catch (error) {
-      throw new AgentError("Failed to generate step outcome", error);
-    }
-  }
-
-  private async evaluate(args: {
-    query: string;
-    maxNewSteps: number;
-    context: AgentContext;
-  }): Promise<Evaluation> {
-    const { query, maxNewSteps, context } = args;
-    const messages: LLMMessage[] = [
-      {
-        role: "system",
-        content: this.prompts.evaluateSystemPrompt(maxNewSteps),
-      },
-      {
-        role: "user",
-        content: this.prompts.evaluateUserPrompt({ context, query }),
-      },
-    ];
-
-    try {
-      return await this.llmService.getStructuredOutput<Evaluation>({
-        messages,
-        schema: evaluationSchema,
-        schemaName: "evaluation",
-      });
-    } catch (error) {
-      throw new AgentError("Failed to evaluate step", error);
-    }
-  }
-
-  private async synthesizeFinalAnswer(
-    query: string,
-    context: AgentContext,
-  ): Promise<FinalAnswer> {
-    const messages: LLMMessage[] = [
-      { role: "system", content: this.prompts.finalAnswerSystemPrompt() },
-      {
-        role: "user",
-        content: this.prompts.finalAnswerUserPrompt({ context, query }),
-      },
-    ];
-
-    try {
-      return await this.llmService.getStructuredOutput<FinalAnswer>({
-        messages,
-        schema: finalAnswerSchema,
-        schemaName: "final_answer",
-      });
-    } catch (error) {
-      throw new AgentError("Failed to generate the final answer", error);
-    }
+    queryPlanner.cancelPlan();
+    return await evaluator.synthesizeFinalAnswer({ query, context });
   }
 }

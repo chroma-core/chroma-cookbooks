@@ -2,29 +2,15 @@ import React from "react";
 import { Text, Box, Newline, useInput, useApp } from "ink";
 import {
   FinalAnswer,
+  getStatusSymbol,
   PlanStep,
   PlanStepStatus,
   Query,
 } from "@agentic-search/search-agent";
 
-function getStatusSymbol(status: PlanStepStatus) {
-  switch (status) {
-    case PlanStepStatus.InProgress:
-      return "◻";
-    case PlanStepStatus.Success:
-      return "✓";
-    case PlanStepStatus.Failure:
-    case PlanStepStatus.Timeout:
-      return "ⅹ";
-    case PlanStepStatus.Cancelled:
-      return "⊘";
-    default:
-      return "・";
-  }
-}
-
 interface CLIProps {
   appStatus: string;
+  displayMessages: number;
   query: Query | null;
   plan: PlanStep[];
   assistantMessages: string[];
@@ -34,6 +20,7 @@ interface CLIProps {
 
 export function CLIView({
   appStatus,
+  displayMessages,
   query,
   plan,
   assistantMessages,
@@ -49,7 +36,7 @@ export function CLIView({
     }
   });
 
-  const lastMessages = assistantMessages.slice(-1);
+  const lastMessages = assistantMessages.slice(-displayMessages);
 
   return (
     <Box padding={1} flexDirection="column">

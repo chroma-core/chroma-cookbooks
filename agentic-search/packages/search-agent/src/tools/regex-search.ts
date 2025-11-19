@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { Tool } from "@agentic-search/base-agent";
 import { Collection, K, Search } from "chromadb";
-import { processRecords } from "./utils";
+import { ChromaTool, ChromaToolResult } from "./chroma-tool";
+import { processSearchResults } from "./utils";
 
 const parametersSchema = z.object({
   pattern: z.string().describe("The regex pattern to match for."),
 });
 
-export class RegexSearchTool extends Tool {
+export class RegexSearchTool extends ChromaTool {
   private collection: Collection;
 
   constructor(collection: Collection) {
@@ -22,14 +22,19 @@ export class RegexSearchTool extends Tool {
 
   public async execute(
     parameters: z.infer<typeof parametersSchema>,
-  ): Promise<string> {
+  ): Promise<ChromaToolResult> {
     const search = new Search()
       .where(K("query").ne(true).and(K.DOCUMENT.regex(parameters.pattern)))
       .limit(5)
       .select(K.DOCUMENT, K.METADATA);
 
-    const records = await this.collection.search(search);
+    const start = Date.now();
+    const results = await this.collection.search(search);
+    const end = Date.now();
 
-    return processRecords(records);
+    return {
+      records: processSearchResults(results),
+      latency: `${(end - start).toFixed(2)} ms`,
+    };
   }
 }

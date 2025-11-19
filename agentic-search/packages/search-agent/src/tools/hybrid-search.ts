@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { Tool } from "@agentic-search/base-agent";
 import { Collection, K, Knn, Rrf, Search } from "chromadb";
-import { processRecords } from "./utils";
+import { ChromaTool, ChromaToolResult } from "./chroma-tool";
+import { processSearchResults } from "./utils";
 
 const parametersSchema = z.object({
   denseQuery: z
@@ -28,7 +28,7 @@ const parametersSchema = z.object({
     .optional(),
 });
 
-export class HybridSearchTool extends Tool {
+export class HybridSearchTool extends ChromaTool {
   private collection: Collection;
 
   constructor(collection: Collection) {
@@ -57,7 +57,7 @@ Guidelines:
 
   public async execute(
     parameters: z.infer<typeof parametersSchema>,
-  ): Promise<string> {
+  ): Promise<ChromaToolResult> {
     const {
       denseQuery,
       sparseQuery,
@@ -84,13 +84,21 @@ Guidelines:
       k: 60,
     });
 
+    const start = Date.now();
+
     const search = new Search()
       .rank(hybridRank)
       .where(K("query").ne(true))
       .limit(5)
       .select(K.DOCUMENT, K.METADATA);
 
-    const records = await this.collection.search(search);
-    return processRecords(records);
+    const results = await this.collection.search(search);
+
+    const end = Date.now();
+
+    return {
+      records: processSearchResults(results),
+      latency: `${(end - start).toFixed(2)} ms`,
+    };
   }
 }

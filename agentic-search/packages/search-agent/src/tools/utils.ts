@@ -1,19 +1,14 @@
 import { QueryResult, SearchResult } from "chromadb";
+import { ChromaRecord } from "./chroma-tool";
 
 export type RecordMetadata = { doc_id: string };
 
-export function processRecords(
+export function processSearchResults(
   records: QueryResult<RecordMetadata> | SearchResult,
-) {
-  if (records.ids[0].length === 0) {
-    return "No records found";
-  }
-
-  return records
-    .rows()[0]
-    .map(
-      (record) =>
-        `// Document ${record.id}\n${record.metadata ? `// Corpus ID: ${record.metadata.doc_id}\n` : ""}\n${record.document}`,
-    )
-    .join("\n\n");
+): ChromaRecord[] {
+  return records.rows()[0].map((record) => ({
+    id: record.id,
+    docId: (record.metadata?.doc_id as string) || "Not found",
+    document: record.document || "Corrupted",
+  }));
 }

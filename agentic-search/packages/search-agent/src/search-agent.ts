@@ -1,4 +1,10 @@
-import { BaseAgent, FinalAnswer, Tool } from "@agentic-search/base-agent";
+import {
+  BaseAgent,
+  CreateBaseAgentConfig,
+  FinalAnswer,
+  LLMFactory,
+  Tool,
+} from "@agentic-search/base-agent";
 import { Collection } from "chromadb";
 import { SearchAgentAnswerArgs, SearchAgentConfig } from "./types";
 import { getBrowseCompPlusCollection, getQuery } from "./chroma";
@@ -11,7 +17,9 @@ import {
 
 export class SearchAgent extends BaseAgent {
   private readonly browseCompPlusCollection: Collection;
-  declare protected readonly statusHandler: SearchAgentStatusHandler;
+  declare protected readonly statusHandler:
+    | SearchAgentStatusHandler
+    | undefined;
 
   constructor(config: SearchAgentConfig) {
     const tools: Tool[] = searchTools.map(
@@ -26,23 +34,25 @@ export class SearchAgent extends BaseAgent {
   }
 
   public static async create(
-    config: Omit<SearchAgentConfig, "browseCompPlusCollection">,
+    config: Omit<CreateBaseAgentConfig, "prompts" | "tools">,
   ): Promise<SearchAgent> {
+    const llmService = await LLMFactory.create(config.llmConfig);
     const browseCompPlusCollection = await getBrowseCompPlusCollection();
 
     return new SearchAgent({
       ...config,
+      llmService,
       browseCompPlusCollection,
     });
   }
 
-  public async answerQuery(args: SearchAgentAnswerArgs): Promise<FinalAnswer> {
+  public async answer(args: SearchAgentAnswerArgs): Promise<FinalAnswer> {
     const query = await getQuery({
       collection: this.browseCompPlusCollection,
       queryId: args.queryId,
     });
 
-    this.statusHandler.onQueryUpdate(query);
+    this.statusHandler?.onQueryUpdate(query);
     return super.answer({ ...args, query: query.content });
   }
 }

@@ -1,7 +1,7 @@
-import { Tool } from "@agentic-search/base-agent";
 import { z } from "zod";
 import { Collection } from "chromadb";
-import { processRecords } from "./utils";
+import { ChromaTool, ChromaToolResult } from "./chroma-tool";
+import { processSearchResults } from "./utils";
 
 const parametersSchema = z.object({
   query: z
@@ -11,7 +11,7 @@ const parametersSchema = z.object({
     ),
 });
 
-export class SemanticSearchTool extends Tool {
+export class SemanticSearchTool extends ChromaTool {
   private collection: Collection;
 
   constructor(collection: Collection) {
@@ -27,13 +27,20 @@ export class SemanticSearchTool extends Tool {
 
   public async execute(
     parameters: z.infer<typeof parametersSchema>,
-  ): Promise<string> {
-    const records = await this.collection.query<{ doc_id: string }>({
+  ): Promise<ChromaToolResult> {
+    const start = Date.now();
+
+    const results = await this.collection.query<{ doc_id: string }>({
       queryTexts: [parameters.query],
       where: { query: { $ne: true } },
       nResults: 5,
     });
 
-    return processRecords(records);
+    const end = Date.now();
+
+    return {
+      records: processSearchResults(results),
+      latency: `${(end - start).toFixed(2)} ms`,
+    };
   }
 }

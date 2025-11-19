@@ -1,15 +1,9 @@
-import {
-  AgentStatusHandler,
-  BaseAgentAnswerArgs,
-  BaseAgentConfig,
-} from "@agentic-search/base-agent";
+import { BaseAgentAnswerArgs, CoreServices } from "@agentic-search/base-agent";
 import { Collection } from "chromadb";
-import { SearchAgentStatusHandler } from "./status-handler";
 
 export interface SearchAgentConfig
-  extends Omit<BaseAgentConfig, "tools" | "prompts"> {
+  extends Omit<CoreServices, "prompts" | "tools"> {
   browseCompPlusCollection: Collection;
-  statusHandler?: SearchAgentStatusHandler;
 }
 
 export interface SearchAgentAnswerArgs
