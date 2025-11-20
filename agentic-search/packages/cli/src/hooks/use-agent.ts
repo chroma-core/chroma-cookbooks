@@ -15,7 +15,7 @@ import {
   ChromaToolResult,
 } from "@agentic-search/search-agent";
 
-export function useArgent({
+export function useAgent({
   queryId,
   flags,
 }: {
