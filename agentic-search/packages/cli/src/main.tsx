@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { cli, CLIFlags } from "@/cli";
-import { useArgent } from "@/hooks/use-agent";
+import { useAgent } from "@/hooks/use-agent";
 import { CLIView } from "@/components/cli-view";
 import { render } from "ink";
 import { configResult } from "@/config";
@@ -16,7 +16,7 @@ function App({ queryId, flags }: { queryId: string; flags: CLIFlags }) {
     assistantMessages,
     result,
     error,
-  } = useArgent({
+  } = useAgent({
     queryId,
     flags,
   });
