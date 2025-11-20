@@ -10,7 +10,6 @@ export function ConfigError({ issues }: { issues: ZodIssue[] }) {
     <CLIView
       appStatus="Configuration Error"
       query={null}
-      displayMessages={0}
       plan={[]}
       assistantMessages={[]}
       result={null}

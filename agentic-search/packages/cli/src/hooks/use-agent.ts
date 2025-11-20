@@ -28,7 +28,6 @@ export function useAgent({
   const [assistantMessages, setAssistantMessages] = useState<string[]>([]);
   const [result, setResult] = useState<FinalAnswer | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [displayMessages, setDisplayMessages] = useState<number>(1);
 
   useEffect(() => {
     class CLIStatusHandler implements SearchAgentStatusHandler {
@@ -47,7 +46,6 @@ export function useAgent({
       }) {
         const message = `I am calling ${args.toolCall.name}(${getToolParamsSymbol(args.toolParams)})\n${args.reason ? args.reason : ""}`;
         setAssistantMessages((prevMessages) => [...prevMessages, message]);
-        setDisplayMessages(2);
       }
 
       onStepOutcome(outcome: StepOutcome) {
@@ -55,7 +53,6 @@ export function useAgent({
           ...prevMessages,
           outcome.summary,
         ]);
-        setDisplayMessages(1);
       }
 
       onPlanEvaluation(evaluation: Evaluation) {
@@ -73,7 +70,7 @@ export function useAgent({
     async function runAgent() {
       // TODO: remove hardcoded provider model
       const provider = flags.provider || "openai";
-      const model = flags.model || "gpt-5-nano";
+      const model = flags.model || "gpt-4o-mini";
       const maxPlanSize = flags.maxPlanSize;
 
       const cliStatusHandler = new CLIStatusHandler();
@@ -106,7 +103,6 @@ export function useAgent({
 
   return {
     appStatus,
-    displayMessages,
     query,
     queryPlan,
     assistantMessages,

@@ -10,7 +10,6 @@ import {
 
 interface CLIProps {
   appStatus: string;
-  displayMessages: number;
   query: Query | null;
   plan: PlanStep[];
   assistantMessages: string[];
@@ -20,7 +19,6 @@ interface CLIProps {
 
 export function CLIView({
   appStatus,
-  displayMessages,
   query,
   plan,
   assistantMessages,
@@ -36,7 +34,7 @@ export function CLIView({
     }
   });
 
-  const lastMessages = assistantMessages.slice(-displayMessages);
+  const lastMessages = assistantMessages.slice(-1);
 
   return (
     <Box padding={1} flexDirection="column">

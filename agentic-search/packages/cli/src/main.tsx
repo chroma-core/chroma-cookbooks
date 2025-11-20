@@ -8,23 +8,15 @@ import { configResult } from "@/config";
 import { ConfigError } from "@/components/config-error";
 
 function App({ queryId, flags }: { queryId: string; flags: CLIFlags }) {
-  const {
-    appStatus,
-    displayMessages,
-    query,
-    queryPlan,
-    assistantMessages,
-    result,
-    error,
-  } = useAgent({
-    queryId,
-    flags,
-  });
+  const { appStatus, query, queryPlan, assistantMessages, result, error } =
+    useAgent({
+      queryId,
+      flags,
+    });
 
   return (
     <CLIView
       appStatus={appStatus}
-      displayMessages={displayMessages}
       query={query}
       plan={queryPlan}
       assistantMessages={assistantMessages}
