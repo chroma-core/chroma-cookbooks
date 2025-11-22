@@ -30,7 +30,8 @@ export function CLIView({
   useInput((input) => {
     if (input === "q") {
       exit();
-      process.exit(0);
+      // Give Ink time to clean up before exiting
+      setTimeout(() => process.exit(0), 100);
     }
   });
 
