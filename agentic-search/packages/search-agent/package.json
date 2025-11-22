@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "@agentic-search/base-agent": "workspace:*",
+    "@chroma-core/chroma-bm25": "^0.1.9",
+    "@chroma-core/default-embed": "^0.1.9",
     "chromadb": "^3.1.4",
     "dotenv": "^17.2.3",
     "zod": "^3.25.76"

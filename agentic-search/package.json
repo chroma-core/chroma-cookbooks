@@ -15,9 +15,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "@chroma-core/chroma-cloud-qwen": "^0.1.9",
-    "@chroma-core/chroma-cloud-splade": "^0.1.9"
   }
 }
