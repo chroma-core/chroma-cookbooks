@@ -2,13 +2,11 @@
 
 Eval harness for iterating on single-stage retrieval.
 
-Latest update on 12-23-2025
-
 ## Overview
 
 ![Diagram](diagrams/image.png)
 
-This playground breaks retrieval into three components:
+This playground breaks down retrieval into three components:
 1. **Embedding** (i.e. dense, sparse)
 2. **Pre-retrieval processing** (i.e. query expansion)
 3. **Post-retrieval processing** (i.e. reranking via Voyage AI reranker)
@@ -125,3 +123,12 @@ Results are saved to:
   ]
 }
 ```
+
+## Future Plans
+
+Generative evals
+- Given a corpus of documents, generate an eval set
+  - Would allow for testing chunking strategies
+
+Agentic search
+- Support multi-stage search in which a search agent has tools to search the corpus
