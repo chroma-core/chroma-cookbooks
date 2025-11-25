@@ -1,0 +1,35 @@
+{
+  "data_dir": "data/experimentation-playground-sample-data",
+  "output_dir": "results/sample_sweep",
+  "runs": [
+    {
+      "run_id": "dense-openai-small",
+      "embed_method": "dense:openai:text-embedding-3-small",
+      "collection": "dense-openai-small"
+    },
+    {
+      "run_id": "sparse-splade",
+      "embed_method": "sparse",
+      "collection": "sparse-splade"
+    },
+    {
+      "run_id": "dense-openai-small-rewrite",
+      "embed_method": "dense:openai:text-embedding-3-small",
+      "rewrite_method": "expand:openai:gpt-4.1-nano",
+      "collection": "dense-openai-small"
+    },
+    {
+      "run_id": "dense-openai-small-rerank",
+      "embed_method": "dense:openai:text-embedding-3-small",
+      "rerank_method": "voyage:rerank-2.5",
+      "collection": "dense-openai-small"
+    },
+    {
+      "run_id": "dense-openai-small-rewrite-rerank",
+      "embed_method": "dense:openai:text-embedding-3-small",
+      "rewrite_method": "expand:openai:gpt-4.1-nano",
+      "rerank_method": "voyage:rerank-2.5",
+      "collection": "dense-openai-small"
+    }
+  ]
+}
