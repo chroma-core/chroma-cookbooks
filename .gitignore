@@ -34,3 +34,29 @@ coverage/
 *.tmp
 *.temp
 .cache/
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv
+.uv/
+
+# Data and results
+data/
+results/
+
+# Package build artifacts
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter
+*.ipynb
+
+# tests
+test*
