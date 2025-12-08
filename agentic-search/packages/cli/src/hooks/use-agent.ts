@@ -1,19 +1,18 @@
 import { CLIFlags } from "@/cli";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  FinalAnswer,
-  parseLLMProvider,
-  PlanStep,
-  Query,
-  SearchAgent,
-  ToolCall,
   AgentError,
-  SearchAgentStatusHandler,
-  getToolParamsSymbol,
-  StepOutcome,
+  Answer,
+  BCPAgentStatusHandler,
+  BrowseCompPlusAgent,
   Evaluation,
-  ChromaToolResult,
-} from "@agentic-search/search-agent";
+  getToolParamsSymbol,
+  LLMFactory,
+  Outcome,
+  Query,
+  Step,
+  ToolCall,
+} from "@agentic-search/bcp-agent";
 
 export function useAgent({
   queryId,
@@ -24,14 +23,18 @@ export function useAgent({
 }) {
   const [appStatus, setAppStatus] = useState<string>("");
   const [query, setQuery] = useState<Query | null>(null);
-  const [queryPlan, setQueryPlan] = useState<PlanStep[]>([]);
+  const [queryPlan, setQueryPlan] = useState<Step[]>([]);
   const [assistantMessages, setAssistantMessages] = useState<string[]>([]);
-  const [result, setResult] = useState<FinalAnswer | null>(null);
+  const [result, setResult] = useState<Answer | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
-    class CLIStatusHandler implements SearchAgentStatusHandler {
-      onQueryPlanUpdate(queryPlan: PlanStep[]) {
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    class CLIStatusHandler implements BCPAgentStatusHandler {
+      onPlanUpdate(queryPlan: Step[]) {
         setQueryPlan([...queryPlan]);
       }
 
@@ -48,7 +51,7 @@ export function useAgent({
         setAssistantMessages((prevMessages) => [...prevMessages, message]);
       }
 
-      onStepOutcome(outcome: StepOutcome) {
+      onStepOutcome(outcome: Outcome) {
         setAssistantMessages((prevMessages) => [
           ...prevMessages,
           outcome.summary,
@@ -75,9 +78,9 @@ export function useAgent({
 
       const cliStatusHandler = new CLIStatusHandler();
 
-      const agent = await SearchAgent.create({
+      const agent = await BrowseCompPlusAgent.create({
         llmConfig: {
-          provider: parseLLMProvider(provider),
+          provider: LLMFactory.parseLLMProvider(provider),
           model,
         },
         statusHandler: cliStatusHandler,
@@ -86,6 +89,7 @@ export function useAgent({
       const finalAnswer = await agent.answer({
         queryId,
         maxPlanSize,
+        signal: abortController.signal,
       });
 
       setResult(finalAnswer);
@@ -93,13 +97,24 @@ export function useAgent({
     }
 
     runAgent().catch((error) => {
+      if (abortController.signal.aborted) {
+        return;
+      }
       const message =
         error instanceof AgentError
           ? `${error.message}. ${error.cause instanceof Error ? error.cause.message : ""}`
           : "Unknown error";
       setError(message);
     });
+
+    return () => {
+      abortController.abort();
+    };
   }, [queryId, flags]);
+
+  const cancel = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   return {
     appStatus,
@@ -108,5 +123,6 @@ export function useAgent({
     assistantMessages,
     result,
     error,
+    cancel,
   };
 }

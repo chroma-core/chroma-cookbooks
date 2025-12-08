@@ -3,14 +3,11 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "jsx": "react-jsx",
     "paths": {
-      "@/*": ["./src/*"],
-      "@agentic-search/bcp-agent": ["../bcp-agent/src"],
       "@chroma-cookbooks/agent-framework": ["../../../agent-framework/src"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../bcp-agent" }]
+  "references": [{ "path": "../../../agent-framework" }]
 }

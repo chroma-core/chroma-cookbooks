@@ -1,20 +1,21 @@
 import React from "react";
 import { Text, Box, Newline, useInput, useApp } from "ink";
 import {
-  FinalAnswer,
+  Answer,
+  BaseStepStatus,
   getStatusSymbol,
-  PlanStep,
-  PlanStepStatus,
   Query,
-} from "@agentic-search/search-agent";
+  Step,
+} from "@agentic-search/bcp-agent";
 
 interface CLIProps {
   appStatus: string;
   query: Query | null;
-  plan: PlanStep[];
+  plan: Step[];
   assistantMessages: string[];
-  result: FinalAnswer | null;
+  result: Answer | null;
   error: string | null;
+  cancel: () => void;
 }
 
 export function CLIView({
@@ -24,14 +25,14 @@ export function CLIView({
   assistantMessages,
   result,
   error,
+  cancel,
 }: CLIProps) {
   const { exit } = useApp();
 
   useInput((input) => {
     if (input === "q") {
+      cancel();
       exit();
-      // Give Ink time to clean up before exiting
-      setTimeout(() => process.exit(0), 100);
     }
   });
 
@@ -56,8 +57,8 @@ export function CLIView({
           {plan.map((step) => (
             <Text
               key={step.id}
-              strikethrough={step.status === PlanStepStatus.Cancelled}
-              dimColor={step.status === PlanStepStatus.Cancelled}
+              strikethrough={step.status === BaseStepStatus.Cancelled}
+              dimColor={step.status === BaseStepStatus.Cancelled}
             >
               {getStatusSymbol(step.status)} {step.title}
             </Text>

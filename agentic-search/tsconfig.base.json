@@ -13,6 +13,12 @@
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
     "incremental": true,
-    "composite": true
-  }
+    "composite": true,
+    "paths": {
+      "@chroma-cookbooks/agent-framework": ["../agent-framework/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": ",../agent-framework" }]
 }

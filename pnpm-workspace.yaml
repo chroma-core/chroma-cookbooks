@@ -1,0 +1,4 @@
+packages:
+  - 'agent-framework'
+  - 'agentic-search'
+  - 'agentic-search/packages/*'
