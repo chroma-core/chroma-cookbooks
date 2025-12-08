@@ -8,14 +8,13 @@ import {
   AnswerOf,
   AnswerSchemaOf,
   BaseAgentTypes,
-  EvaluationOf,
   EvaluationSchemaOf,
   StepSchemaOf,
   SystemEvaluationOf,
   SystemSchemaEvaluationOf,
-} from "../../agent/types";
-import { createBaseSystemEvaluation } from "../../agent/schemas";
-import { EvaluatorError } from "../../agent/errors";
+  createBaseSystemEvaluation,
+  EvaluatorError,
+} from "../../agent";
 
 export class BaseEvaluator<T extends BaseAgentTypes>
   extends BaseComponent<T>
@@ -38,7 +37,6 @@ export class BaseEvaluator<T extends BaseAgentTypes>
   }
 
   async evaluatePlan({
-    query,
     maxNewSteps,
     context,
   }: {
@@ -46,10 +44,16 @@ export class BaseEvaluator<T extends BaseAgentTypes>
     maxNewSteps: number;
     context: Context<T>;
   }): Promise<SystemEvaluationOf<T>> {
+    let prompt = this.prompts.evaluatePlanSystemPrompt(maxNewSteps);
+    if (context.memory && context.memory.forEvaluation) {
+      const memoryPrompt = await context.memory.forEvaluation({ context });
+      prompt += "\n\n" + memoryPrompt;
+    }
+
     const messages: LLMMessage[] = [
       {
         role: LLMRole.System,
-        content: this.prompts.evaluatePlanSystemPrompt(maxNewSteps),
+        content: prompt,
       },
       {
         role: LLMRole.User,
@@ -75,16 +79,21 @@ export class BaseEvaluator<T extends BaseAgentTypes>
   }
 
   async synthesizeFinalAnswer({
-    query,
     context,
   }: {
     query: string;
     context: Context<T>;
   }): Promise<AnswerOf<T>> {
+    let prompt = this.prompts.finalAnswerSystemPrompt();
+    if (context.memory && context.memory.forAnswer) {
+      const memoryPrompt = await context.memory.forAnswer({ context });
+      prompt += "\n\n" + memoryPrompt;
+    }
+
     this.statusHandler?.onAssistantUpdate?.("Finalizing my answer...");
 
     const messages: LLMMessage[] = [
-      { role: LLMRole.System, content: this.prompts.finalAnswerSystemPrompt() },
+      { role: LLMRole.System, content: prompt },
       {
         role: LLMRole.User,
         content: this.prompts.finalAnswerUserPrompt({ context }),

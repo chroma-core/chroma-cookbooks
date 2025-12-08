@@ -19,6 +19,7 @@ import { BaseComponentConfig } from "../components/base";
 import { Planner } from "../components/planner";
 import { Evaluator } from "../components/evaluator";
 import { Context, ContextConfig } from "../states/context";
+import { Memory } from "../states/memory";
 
 export interface BaseAgentTypes {
   step: BaseStepSchema;
@@ -83,9 +84,10 @@ export type ContextFactory<T extends BaseAgentTypes> = (
   config: ContextConfig<T>,
 ) => Context<T>;
 
-export interface BaseAgentStateFactory<T extends BaseAgentTypes> {
+export type BaseAgentStateFactory<T extends BaseAgentTypes> = Partial<{
   context: ContextFactory<T>;
-}
+  memory: BaseAgentFactory<T, Memory<T>>;
+}>;
 
 export interface Runtime<T extends BaseAgentTypes> {
   planner: Planner<T>;

@@ -12,8 +12,8 @@ import {
   BaseAgentConfig,
   BaseAgentSchemas,
   BaseAgentServices,
-  BaseAgentStateFactory,
   BaseAgentTypes,
+  ContextFactory,
   CreateBaseAgentConfig,
   EvaluationSchemaOf,
   OutcomeOf,
@@ -28,13 +28,14 @@ import { ConsoleStatusHandler } from "../services/status-handler";
 import { createBasePrompts } from "../services/prompts/base-prompts";
 import { LLMFactory } from "../services/llms";
 import { Tool } from "../components/executor";
-import { BaseAgentComponentConfig } from "../components/base";
+import { BaseAgentComponentConfig } from "../components";
 import { BasePlanner } from "../components/planner";
 import { BaseExecutor } from "../components/executor/base-executor";
 import { BaseEvaluator } from "../components/evaluator";
 import { BaseContext, Context, ContextConfig } from "../states/context";
 import { runContext, throwIfAborted } from "./run-context";
 import { AgentError } from "./errors";
+import { Memory } from "../states/memory";
 
 export class BaseAgent<T extends BaseAgentTypes> {
   protected static DEFAULT_SCHEMAS = {
@@ -48,7 +49,8 @@ export class BaseAgent<T extends BaseAgentTypes> {
   protected readonly services: BaseAgentServices<T>;
   protected readonly tools: Tool[];
   protected readonly components: BaseAgentComponentFactory<T>;
-  protected readonly states: BaseAgentStateFactory<T>;
+  protected readonly context: ContextFactory<T>;
+  protected readonly memory: Memory<T> | undefined;
 
   protected constructor(config: BaseAgentConfig<T>) {
     const { schemas, services, tools, components, states } = config;
@@ -77,9 +79,16 @@ export class BaseAgent<T extends BaseAgentTypes> {
 
     this.components = { planner, executor, evaluator };
 
-    const { context = (config: ContextConfig<T>) => new BaseContext(config) } =
-      states ?? {};
-    this.states = { context };
+    const {
+      context = (config: ContextConfig<T>) => new BaseContext(config),
+      memory,
+    } = states ?? {};
+    this.context = context;
+    this.memory = memory ? memory(this.componentConfig()) : undefined;
+
+    if (this.memory && this.memory.tools) {
+      this.tools = [...this.tools, ...this.memory.tools];
+    }
   }
 
   static create<T extends Partial<BaseAgentTypes> = {}>(
@@ -225,9 +234,17 @@ export class BaseAgent<T extends BaseAgentTypes> {
       const runtime = this.runtime();
       const { planner } = runtime;
 
-      const context = this.states.context({ query, plan: planner.getPlan });
+      const context = this.context({
+        query,
+        plan: planner.getPlan,
+        memory: this.memory,
+      });
 
-      await planner.initialize({ query, maxSize: maxPlanSize });
+      await planner.initialize({
+        query,
+        maxSize: maxPlanSize,
+        memory: this.memory,
+      });
 
       for (const steps of planner) {
         throwIfAborted();

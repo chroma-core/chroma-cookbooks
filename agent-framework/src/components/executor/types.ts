@@ -9,7 +9,7 @@ import {
   OutcomeOf,
   OutcomeSchemaOf,
   StepOf,
-} from "../../agent/types";
+} from "../../agent";
 
 export interface Executor<T extends BaseAgentTypes> {
   outcomeSchema: OutcomeSchemaOf<T>;

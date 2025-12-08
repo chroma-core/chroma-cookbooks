@@ -55,10 +55,16 @@ export class BaseExecutor<T extends BaseAgentTypes>
     context: Context<T>;
     maxIterations: number;
   }): Promise<OutcomeOf<T>> {
+    let prompt = this.prompts.executeStepSystemPrompt();
+    if (context.memory && context.memory.forExecution) {
+      const memoryPrompt = await context.memory.forExecution({ context });
+      prompt += "\n\n" + memoryPrompt;
+    }
+
     const messages: LLMMessage[] = [
       {
         role: LLMRole.System,
-        content: this.prompts.executeStepSystemPrompt(),
+        content: prompt,
       },
       {
         role: LLMRole.User,

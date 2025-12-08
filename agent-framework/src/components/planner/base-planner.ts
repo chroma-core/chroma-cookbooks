@@ -13,6 +13,7 @@ import {
   BaseStep,
   BaseStepStatus,
 } from "../../agent";
+import { Memory } from "../../states/memory";
 
 export class BasePlanner<T extends BaseAgentTypes>
   extends BaseComponent<T>
@@ -46,9 +47,11 @@ export class BasePlanner<T extends BaseAgentTypes>
   async initialize({
     maxSize,
     query,
+    memory,
   }: {
     maxSize: number;
     query: string;
+    memory?: Memory<T>;
   }): Promise<void> {
     if (maxSize < 0) {
       throw new PlannerError("Plan size must be nonnegative");
@@ -59,7 +62,7 @@ export class BasePlanner<T extends BaseAgentTypes>
     if (maxSize <= 1) {
       this.plan = this.singletonQueryPlan();
     } else {
-      this.plan = await this.generate({ maxSize, query });
+      this.plan = await this.generate({ maxSize, query, memory });
     }
   }
 
@@ -152,14 +155,22 @@ export class BasePlanner<T extends BaseAgentTypes>
   private async generate({
     maxSize,
     query,
+    memory,
   }: {
     maxSize: number;
     query: string;
+    memory?: Memory<T>;
   }): Promise<StepOf<T>[]> {
+    let prompt = this.prompts.generatePlan(maxSize);
+    if (memory && memory.forPlanning) {
+      const memoryPrompt = await memory.forPlanning();
+      prompt += "\n\n" + memoryPrompt;
+    }
+
     const messages: LLMMessage[] = [
       {
         role: LLMRole.System,
-        content: this.prompts.generatePlan(maxSize),
+        content: prompt,
       },
       { role: LLMRole.User, content: query },
     ];
