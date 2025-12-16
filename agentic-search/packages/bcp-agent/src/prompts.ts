@@ -96,7 +96,7 @@ function finalAnswerSystemPrompt() {
   return "You are an expert query planner for a multi-step search agent operating on a large corpus of documents. Given the original question and all the reasoning steps the agent took, produce the final answer. Ground the answer only in the cited evidence. If the evidence is inconclusive, produce your best short answer with a lower confidence score.";
 }
 
-export const searchAgentPrompts: PromptsService<BCPAgentTypes> = {
+export const bcpAgentPrompts: PromptsService<BCPAgentTypes> = {
   generatePlan,
   executeStepSystemPrompt,
   executeStepUserPrompt: ({

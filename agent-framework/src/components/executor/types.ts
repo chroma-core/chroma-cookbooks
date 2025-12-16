@@ -1,10 +1,10 @@
-import { z } from "zod";
 import { Tool, ToolFactory } from "./tool";
 import { Context } from "../../states/context";
 import { ExecutorPrompts } from "../../services/prompts";
 import { ExecutorStatusHandler } from "../../services/status-handler";
 import { BaseComponentConfig } from "../base";
 import {
+  BaseAgentServices,
   BaseAgentTypes,
   OutcomeOf,
   OutcomeSchemaOf,
@@ -21,11 +21,13 @@ export interface Executor<T extends BaseAgentTypes> {
   }): Promise<OutcomeOf<T>>;
 }
 
-export type BaseExecutorConfig<T extends BaseAgentTypes> =
-  BaseComponentConfig<T> &
-    Partial<{
-      readonly outcomeSchema: OutcomeSchemaOf<T>;
-      prompts: Partial<ExecutorPrompts<T>>;
-      statusHandler: Partial<ExecutorStatusHandler<T>>;
-      tools: (Tool | ToolFactory<T>)[];
-    }>;
+export type BaseExecutorConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> = BaseComponentConfig<T, S> &
+  Partial<{
+    readonly outcomeSchema: OutcomeSchemaOf<T>;
+    prompts: Partial<ExecutorPrompts<T>>;
+    statusHandler: Partial<ExecutorStatusHandler<T>>;
+    tools: (Tool | ToolFactory<T, S>)[];
+  }>;

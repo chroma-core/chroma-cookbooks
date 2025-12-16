@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BaseAgentTypes } from "../../agent";
+import { BaseAgentServices, BaseAgentTypes } from "../../agent";
 import { BaseComponentConfig } from "../base";
 
 export interface Tool<P = unknown, R = unknown> {
@@ -12,9 +12,14 @@ export interface Tool<P = unknown, R = unknown> {
   format(result: R): string | undefined;
 }
 
-export type ToolFactoryConfig<T extends BaseAgentTypes> =
-  BaseComponentConfig<T>;
+export type ToolFactoryConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> = BaseComponentConfig<T, S>;
 
-export type ToolFactory<T extends BaseAgentTypes, P = unknown, R = unknown> = (
-  config: ToolFactoryConfig<T>,
-) => Tool<P, R>;
+export type ToolFactory<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+  P = unknown,
+  R = unknown,
+> = (config: ToolFactoryConfig<T, S>) => Tool<P, R>;

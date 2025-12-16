@@ -12,7 +12,7 @@ export interface ExecutorPrompts<T extends BaseAgentTypes> {
     step: StepOf<T>;
     context: Context<T>;
   }): string;
-  finalizeStepPrompt: () => string;
+  finalizeStepPrompt(): string;
 }
 
 export interface EvaluatorPrompts<T extends BaseAgentTypes> {

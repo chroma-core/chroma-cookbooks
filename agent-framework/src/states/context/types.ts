@@ -1,5 +1,11 @@
-import { BaseAgentTypes, OutcomeOf, StepOf } from "../../agent";
+import {
+  BaseAgentServices,
+  BaseAgentTypes,
+  OutcomeOf,
+  StepOf,
+} from "../../agent";
 import { Memory } from "../memory";
+import { BaseComponentConfig } from "../../components";
 
 export interface Context<T extends BaseAgentTypes> {
   readonly plan: readonly StepOf<T>[];
@@ -9,9 +15,12 @@ export interface Context<T extends BaseAgentTypes> {
   addOutcomes(outcomes: OutcomeOf<T>[]): void;
 }
 
-export interface ContextConfig<T extends BaseAgentTypes> {
+export type ContextConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> = BaseComponentConfig<T, S> & {
   query: string;
   history?: OutcomeOf<T>[];
   plan?: () => readonly StepOf<T>[];
   memory?: Memory<T>;
-}
+};

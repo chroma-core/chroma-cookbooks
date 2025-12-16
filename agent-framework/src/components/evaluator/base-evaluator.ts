@@ -14,10 +14,14 @@ import {
   SystemSchemaEvaluationOf,
   createBaseSystemEvaluation,
   EvaluatorError,
+  BaseAgentServices,
 } from "../../agent";
 
-export class BaseEvaluator<T extends BaseAgentTypes>
-  extends BaseComponent<T>
+export class BaseEvaluator<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T> = BaseAgentServices<T>,
+>
+  extends BaseComponent<T, S>
   implements Evaluator<T>
 {
   declare protected prompts: EvaluatorPrompts<T>;
@@ -25,7 +29,7 @@ export class BaseEvaluator<T extends BaseAgentTypes>
   readonly evaluationSchema: SystemSchemaEvaluationOf<T>;
   readonly answerSchema: AnswerSchemaOf<T>;
 
-  constructor(config: BaseEvaluatorConfig<T>) {
+  constructor(config: BaseEvaluatorConfig<T, S>) {
     super(config);
     this.evaluationSchema = config.evaluationSchema
       ? createBaseSystemEvaluation<StepSchemaOf<T>, EvaluationSchemaOf<T>>(

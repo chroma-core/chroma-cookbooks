@@ -1,55 +1,11 @@
-import { ChromaClient, CloudClient, Collection, GetResult } from "chromadb";
-import { AgentError } from "@chroma-cookbooks/agent-framework";
+import { Collection, GetResult } from "chromadb";
+import { AgentError, getCollection } from "@chroma-cookbooks/agent-framework";
 import { Query, QueryRecordMetadata } from "./types";
 
 const BROWSE_COMP_PLUS_COLLECTION_NAME = "browse-comp-plus";
 
-export interface ChromaConfig {
-  apiKey: string;
-  tenant: string;
-  database: string;
-}
-
-export function getChromaClient(config?: Partial<ChromaConfig>): ChromaClient {
-  const {
-    apiKey = process.env.CHROMA_API_KEY,
-    tenant = process.env.CHROMA_TENANT,
-    database = process.env.CHROMA_DATABASE,
-  } = config ?? {};
-
-  if (!apiKey) {
-    throw new AgentError(
-      "Missing Chroma API key. Set your CHROMA_API_KEY environment variable",
-    );
-  }
-
-  if (!tenant) {
-    throw new AgentError(
-      "Missing Chroma tenant information. Set your CHROMA_TENANT environment variable",
-    );
-  }
-
-  if (!database) {
-    throw new AgentError(
-      "Missing Chroma DB name. Set your CHROMA_DATABASE environment variable",
-    );
-  }
-
-  return new CloudClient({ apiKey, tenant, database });
-}
-
 export async function getBrowseCompPlusCollection() {
-  const client = getChromaClient();
-  try {
-    return await client.getCollection({
-      name: BROWSE_COMP_PLUS_COLLECTION_NAME,
-    });
-  } catch (error) {
-    throw new AgentError(
-      `Failed to get the ${BROWSE_COMP_PLUS_COLLECTION_NAME} collection.`,
-      error,
-    );
-  }
+  return await getCollection({ name: BROWSE_COMP_PLUS_COLLECTION_NAME });
 }
 
 export async function getQuery({

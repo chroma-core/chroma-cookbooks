@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Collection, K, Knn, Rrf, Search } from "chromadb";
-import { ChromaTool, ChromaToolConfig, ChromaToolResult } from "./chroma-tool";
+import { ChromaTool, ChromaToolResult } from "./chroma-tool";
 import { processSearchResults } from "./utils";
 
 const parametersSchema = z.object({

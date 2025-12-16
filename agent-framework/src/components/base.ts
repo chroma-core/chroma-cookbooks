@@ -5,16 +5,24 @@ import { PromptsService } from "../services/prompts";
 import { BaseAgentSchemas, BaseAgentServices, BaseAgentTypes } from "../agent";
 import { Tool } from "./executor";
 
-export interface BaseAgentComponentConfig<T extends BaseAgentTypes> {
+export interface BaseAgentComponentConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> {
   agentSchemas: BaseAgentSchemas<T>;
-  agentServices: BaseAgentServices<T>;
+  agentServices: S;
   agentTools: Tool[];
 }
 
-export type BaseComponentConfig<T extends BaseAgentTypes> =
-  BaseAgentComponentConfig<T> & Partial<BaseAgentServices<T>>;
+export type BaseComponentConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T> = BaseAgentServices<T>,
+> = BaseAgentComponentConfig<T, S> & Partial<S>;
 
-export abstract class BaseComponent<T extends BaseAgentTypes> {
+export abstract class BaseComponent<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> {
   protected inputHandler: InputHandler;
   protected llmService: LLMService;
   protected prompts: Partial<PromptsService<T>>;
@@ -26,7 +34,7 @@ export abstract class BaseComponent<T extends BaseAgentTypes> {
     llmService,
     prompts,
     agentServices,
-  }: BaseComponentConfig<T>) {
+  }: BaseComponentConfig<T, S>) {
     this.inputHandler = inputHandler ?? agentServices.inputHandler;
     this.statusHandler = statusHandler ?? agentServices.statusHandler;
     this.llmService = llmService ?? agentServices.llmService;

@@ -1,9 +1,13 @@
-import { z } from "zod";
 import { PlannerPrompts } from "../../services/prompts";
 import { PlannerStatusHandler } from "../../services/status-handler";
 import { BaseComponentConfig } from "../base";
-import { BaseAgentTypes, StepOf, StepSchemaOf } from "../../agent/types";
-import { BaseStepStatus } from "../../agent/schemas";
+import {
+  BaseAgentTypes,
+  StepOf,
+  StepSchemaOf,
+  BaseStepStatus,
+  BaseAgentServices,
+} from "../../agent";
 import { Memory } from "../../states/memory";
 
 export interface Planner<T extends BaseAgentTypes> extends IterableIterator<
@@ -26,10 +30,12 @@ export interface Planner<T extends BaseAgentTypes> extends IterableIterator<
   cancel(): void;
 }
 
-export type BasePlannerConfig<T extends BaseAgentTypes> =
-  BaseComponentConfig<T> &
-    Partial<{
-      stepSchema: StepSchemaOf<T>;
-      prompts: Partial<PlannerPrompts>;
-      statusHandler: Partial<PlannerStatusHandler<T>>;
-    }>;
+export type BasePlannerConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T> = BaseAgentServices<T>,
+> = BaseComponentConfig<T, S> &
+  Partial<{
+    stepSchema: StepSchemaOf<T>;
+    prompts: Partial<PlannerPrompts>;
+    statusHandler: Partial<PlannerStatusHandler<T>>;
+  }>;

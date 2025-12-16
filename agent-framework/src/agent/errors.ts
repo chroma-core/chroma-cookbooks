@@ -1,3 +1,5 @@
+import { LLMMessage } from "../services/llms";
+
 export class AgentError extends Error {
   readonly cause?: any;
 
@@ -30,8 +32,12 @@ export class PlannerError extends AgentError {
 }
 
 export class ExecutorError extends AgentError {
-  constructor(message: string, cause?: any) {
+  toolMessage?: LLMMessage;
+  constructor(message: string, toolMessage?: LLMMessage, cause?: any) {
     super(message, cause);
     this.name = "ExecutorError";
+    this.toolMessage = toolMessage;
   }
 }
+
+export class UserAbortError extends ExecutorError {}

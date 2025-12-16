@@ -15,7 +15,7 @@ import { LLMService, LLMServiceConfig } from "../services/llms";
 import { PromptsService } from "../services/prompts";
 import { AgentStatusHandler } from "../services/status-handler";
 import { Executor, Tool } from "../components/executor";
-import { BaseComponentConfig } from "../components/base";
+import { BaseComponentConfig } from "../components";
 import { Planner } from "../components/planner";
 import { Evaluator } from "../components/evaluator";
 import { Context, ContextConfig } from "../states/context";
@@ -70,23 +70,32 @@ export interface BaseAgentServices<T extends BaseAgentTypes> {
   statusHandler?: AgentStatusHandler<T>;
 }
 
-export type BaseAgentFactory<T extends BaseAgentTypes, R> = (
-  config: BaseComponentConfig<T>,
-) => R;
+export type BaseAgentFactory<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+  R,
+> = (config: BaseComponentConfig<T, S>) => R;
 
-export interface BaseAgentComponentFactory<T extends BaseAgentTypes> {
-  planner: BaseAgentFactory<T, Planner<T>>;
-  executor: BaseAgentFactory<T, Executor<T>>;
-  evaluator: BaseAgentFactory<T, Evaluator<T>>;
+export interface BaseAgentComponentFactory<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> {
+  planner: BaseAgentFactory<T, S, Planner<T>>;
+  executor: BaseAgentFactory<T, S, Executor<T>>;
+  evaluator: BaseAgentFactory<T, S, Evaluator<T>>;
 }
 
-export type ContextFactory<T extends BaseAgentTypes> = (
-  config: ContextConfig<T>,
-) => Context<T>;
+export type ContextFactory<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> = (config: ContextConfig<T, S>) => Context<T>;
 
-export type BaseAgentStateFactory<T extends BaseAgentTypes> = Partial<{
-  context: ContextFactory<T>;
-  memory: BaseAgentFactory<T, Memory<T>>;
+export type BaseAgentStateFactory<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> = Partial<{
+  context: ContextFactory<T, S>;
+  memory: BaseAgentFactory<T, S, Memory<T>>;
 }>;
 
 export interface Runtime<T extends BaseAgentTypes> {
@@ -95,20 +104,26 @@ export interface Runtime<T extends BaseAgentTypes> {
   evaluator: Evaluator<T>;
 }
 
-export interface BaseAgentConfig<T extends BaseAgentTypes> {
+export interface BaseAgentConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> {
   schemas: T;
-  services: BaseAgentServices<T>;
+  services: S;
   tools: Tool[];
-  components?: Partial<BaseAgentComponentFactory<T>>;
-  states?: BaseAgentStateFactory<T>;
+  components?: Partial<BaseAgentComponentFactory<T, S>>;
+  states?: BaseAgentStateFactory<T, S>;
 }
 
-export type CreateBaseAgentConfig<T extends Partial<BaseAgentTypes>> = Partial<{
+export type CreateBaseAgentConfig<
+  T extends Partial<BaseAgentTypes>,
+  S extends BaseAgentServices<Resolve<T>>,
+> = Partial<{
   schemas: T;
-  services: Partial<Omit<BaseAgentServices<Resolve<T>>, "llmService">>;
+  services: Partial<Omit<S, "llmService">>;
   tools: Tool[];
-  components: Partial<BaseAgentComponentFactory<Resolve<T>>>;
-  states: BaseAgentStateFactory<Resolve<T>>;
+  components: Partial<BaseAgentComponentFactory<Resolve<T>, S>>;
+  states: BaseAgentStateFactory<Resolve<T>, S>;
 }> & { llmConfig: LLMServiceConfig };
 
 export interface RunConfig {

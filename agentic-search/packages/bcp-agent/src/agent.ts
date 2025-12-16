@@ -1,4 +1,8 @@
-import { BaseAgent, LLMServiceConfig } from "@chroma-cookbooks/agent-framework";
+import {
+  BaseAgent,
+  BaseAgentServices,
+  LLMServiceConfig,
+} from "@chroma-cookbooks/agent-framework";
 import {
   answerSchema,
   BCPAgentTypes,
@@ -10,7 +14,7 @@ import {
   BCPAgentConsoleStatusHandler,
   BCPAgentStatusHandler,
 } from "./status-handler";
-import { searchAgentPrompts } from "./prompts";
+import { bcpAgentPrompts } from "./prompts";
 import { searchToolsFactory } from "./tools";
 import { getBrowseCompPlusCollection, getQuery } from "./chroma";
 import { BCPAgentConfig, BCPAgentRunConfig } from "./types";
@@ -20,7 +24,7 @@ export class BrowseCompPlusAgent {
   private static MAX_STEP_ITERATIONS = 5;
 
   private readonly browseCompPlusCollection: Collection;
-  private agent: BaseAgent<BCPAgentTypes>;
+  private agent: BaseAgent<BCPAgentTypes, BaseAgentServices<BCPAgentTypes>>;
   private statusHandler: BCPAgentStatusHandler | undefined;
 
   protected constructor({
@@ -40,7 +44,7 @@ export class BrowseCompPlusAgent {
       },
       services: {
         statusHandler: statusHandler ?? new BCPAgentConsoleStatusHandler(),
-        prompts: searchAgentPrompts,
+        prompts: bcpAgentPrompts,
       },
       tools: searchToolsFactory(this.browseCompPlusCollection),
     });

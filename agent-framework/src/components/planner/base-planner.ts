@@ -12,11 +12,15 @@ import {
   PlannerError,
   BaseStep,
   BaseStepStatus,
+  BaseAgentServices,
 } from "../../agent";
 import { Memory } from "../../states/memory";
 
-export class BasePlanner<T extends BaseAgentTypes>
-  extends BaseComponent<T>
+export class BasePlanner<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T> = BaseAgentServices<T>,
+>
+  extends BaseComponent<T, S>
   implements Planner<T>
 {
   declare protected prompts: PlannerPrompts;
@@ -24,19 +28,19 @@ export class BasePlanner<T extends BaseAgentTypes>
   readonly stepSchema: StepSchemaOf<T>;
   private _plan: StepOf<T>[] | undefined;
 
-  constructor(config: BasePlannerConfig<T>) {
+  constructor(config: BasePlannerConfig<T, S>) {
     super(config);
     this.stepSchema = config.stepSchema ?? config.agentSchemas.step;
   }
 
-  private get plan(): StepOf<T>[] {
+  protected get plan(): StepOf<T>[] {
     if (!this._plan) {
       throw new PlannerError("Planner not initialized");
     }
     return this._plan;
   }
 
-  private set plan(plan: StepOf<T>[]) {
+  protected set plan(plan: StepOf<T>[]) {
     this._plan = plan;
   }
 
@@ -163,7 +167,7 @@ export class BasePlanner<T extends BaseAgentTypes>
   }): Promise<StepOf<T>[]> {
     let prompt = this.prompts.generatePlan(maxSize);
     if (memory && memory.forPlanning) {
-      const memoryPrompt = await memory.forPlanning();
+      const memoryPrompt = await memory.forPlanning({ query });
       prompt += "\n\n" + memoryPrompt;
     }
 

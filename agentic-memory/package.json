@@ -1,0 +1,11 @@
+{
+  "name": "@chroma-cookbooks/agentic-memory",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "cli:dev": "pnpm --filter @agentic-memory/cli dev"
+  }
+}

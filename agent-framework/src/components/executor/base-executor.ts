@@ -17,10 +17,15 @@ import {
   StepOf,
   BaseStepStatus,
   ExecutorError,
+  BaseAgentServices,
+  UserAbortError,
 } from "../../agent";
 
-export class BaseExecutor<T extends BaseAgentTypes>
-  extends BaseComponent<T>
+export class BaseExecutor<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+>
+  extends BaseComponent<T, S>
   implements Executor<T>
 {
   declare protected prompts: ExecutorPrompts<T>;
@@ -28,7 +33,7 @@ export class BaseExecutor<T extends BaseAgentTypes>
   private readonly _tools: Record<string, Tool>;
   readonly outcomeSchema: OutcomeSchemaOf<T>;
 
-  constructor(config: BaseExecutorConfig<T>) {
+  constructor(config: BaseExecutorConfig<T, S>) {
     super(config);
     this.outcomeSchema = config.outcomeSchema ?? config.agentSchemas.outcome;
     this._tools = BaseExecutor.mapTools(
@@ -88,11 +93,18 @@ export class BaseExecutor<T extends BaseAgentTypes>
         break;
       }
 
-      const toolsResults: ToolMessage[] = await Promise.all(
-        toolCalls.map(async (call) => await this.runTool(call)),
-      );
+      try {
+        const toolsResults: ToolMessage[] = await Promise.all(
+          toolCalls.map(async (call) => await this.runTool(call)),
+        );
 
-      messages.push(...toolsResults);
+        messages.push(...toolsResults);
+      } catch (e) {
+        if (e instanceof ExecutorError && e.toolMessage) {
+          messages.push(e.toolMessage);
+          break;
+        }
+      }
     }
 
     this.statusHandler?.onAssistantUpdate?.("Finalizing step execution...");
@@ -156,11 +168,15 @@ export class BaseExecutor<T extends BaseAgentTypes>
         toolCallId: toolCall.id,
       };
     } catch (error) {
-      return {
+      const toolErrorMessage: LLMMessage = {
         role: LLMRole.Tool,
         content: `Error running tool ${tool.name}${(error as Error)?.message ? `: ${(error as Error).message}` : ""}`,
         toolCallId: toolCall.id,
       };
+      if (error instanceof UserAbortError) {
+        throw new ExecutorError(error.message, toolErrorMessage, error.cause);
+      }
+      return toolErrorMessage;
     }
   }
 
@@ -177,7 +193,11 @@ export class BaseExecutor<T extends BaseAgentTypes>
         schemaName: "step_outcome",
       });
     } catch (error) {
-      throw new ExecutorError("Failed to generate step outcome", error);
+      throw new ExecutorError(
+        "Failed to generate step outcome",
+        undefined,
+        error,
+      );
     }
   }
 }

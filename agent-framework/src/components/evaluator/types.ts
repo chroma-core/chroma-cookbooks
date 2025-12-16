@@ -6,11 +6,12 @@ import { BaseComponentConfig } from "../base";
 import {
   AnswerOf,
   AnswerSchemaOf,
+  BaseAgentServices,
   BaseAgentTypes,
   EvaluationSchemaOf,
   SystemEvaluationOf,
   SystemSchemaEvaluationOf,
-} from "../../agent/types";
+} from "../../agent";
 
 export interface Evaluator<T extends BaseAgentTypes> {
   readonly evaluationSchema: SystemSchemaEvaluationOf<T>;
@@ -28,11 +29,13 @@ export interface Evaluator<T extends BaseAgentTypes> {
   }): Promise<AnswerOf<T>>;
 }
 
-export type BaseEvaluatorConfig<T extends BaseAgentTypes> =
-  BaseComponentConfig<T> &
-    Partial<{
-      evaluationSchema: EvaluationSchemaOf<T>;
-      answerSchema: AnswerSchemaOf<T>;
-      statusHandler: Partial<EvaluatorStatusHandler<T>>;
-      prompts: Partial<EvaluatorPrompts<T>>;
-    }>;
+export type BaseEvaluatorConfig<
+  T extends BaseAgentTypes,
+  S extends BaseAgentServices<T>,
+> = BaseComponentConfig<T, S> &
+  Partial<{
+    evaluationSchema: EvaluationSchemaOf<T>;
+    answerSchema: AnswerSchemaOf<T>;
+    statusHandler: Partial<EvaluatorStatusHandler<T>>;
+    prompts: Partial<EvaluatorPrompts<T>>;
+  }>;
