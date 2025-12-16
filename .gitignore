@@ -60,3 +60,6 @@ build/
 
 # tests
 test*
+
+# LLMs
+.claude
