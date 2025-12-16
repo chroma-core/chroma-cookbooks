@@ -6,11 +6,11 @@
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
-      "@agentic-search/search-agent": ["../search-agent/src"],
-      "@agentic-search/base-agent": ["../base-agent/src"]
+      "@agentic-search/bcp-agent": ["../bcp-agent/src"],
+      "@chroma-cookbooks/agent-framework": ["../../../agent-framework/src"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../search-agent" }, { "path": "../base-agent" }]
+  "references": [{ "path": "../bcp-agent" }]
 }

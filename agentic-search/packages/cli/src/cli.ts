@@ -8,7 +8,7 @@ const helpText = `
         --provider, -p         Specify the provider to use (Default: openai)
         
         --model, -m            Specify the model to use from your provider
-                               (Default: gpt-5-nano)
+                               (Default: gpt-4o-mini)
         
         --max-plan-size        Set the max number of steps in the query plan
                                (Default: 10)

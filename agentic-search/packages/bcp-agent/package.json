@@ -1,0 +1,24 @@
+{
+  "name": "@agentic-search/bcp-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/uuid": "^11.0.0",
+    "prettier": "^3.7.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@chroma-cookbooks/agent-framework": "workspace:*",
+    "@chroma-core/chroma-bm25": "^0.1.10",
+    "@chroma-core/default-embed": "^0.1.9",
+    "chromadb": "^3.1.6",
+    "zod": "^3.25.76",
+    "dotenv": "^17.2.3"
+  }
+}

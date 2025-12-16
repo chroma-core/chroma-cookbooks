@@ -8,7 +8,7 @@ import { configResult } from "@/config";
 import { ConfigError } from "@/components/config-error";
 
 function App({ queryId, flags }: { queryId: string; flags: CLIFlags }) {
-  const { appStatus, query, queryPlan, assistantMessages, result, error } =
+  const { appStatus, query, queryPlan, assistantMessages, result, error, cancel } =
     useAgent({
       queryId,
       flags,
@@ -22,6 +22,7 @@ function App({ queryId, flags }: { queryId: string; flags: CLIFlags }) {
       assistantMessages={assistantMessages}
       result={result}
       error={error}
+      cancel={cancel}
     />
   );
 }
