@@ -1,0 +1,10 @@
+chromadb
+jupyter
+python-dotenv
+pandas
+umap-learn
+numpy<2.4
+tqdm
+matplotlib
+openai
+scikit-learn
