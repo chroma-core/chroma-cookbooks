@@ -14,7 +14,7 @@ import { z } from "zod";
 import { LLMService, LLMServiceConfig } from "../services/llms";
 import { PromptsService } from "../services/prompts";
 import { AgentStatusHandler } from "../services/status-handler";
-import { Executor, Tool } from "../components/executor";
+import { Executor, Tool, ToolFactory } from "../components/executor";
 import { BaseComponentConfig } from "../components";
 import { Planner } from "../components/planner";
 import { Evaluator } from "../components/evaluator";
@@ -131,4 +131,5 @@ export interface RunConfig {
   maxStepIterations: number;
   query?: string;
   signal?: AbortSignal;
+  runtimeTools?: Tool[];
 }

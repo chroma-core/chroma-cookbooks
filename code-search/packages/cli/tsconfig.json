@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@code-search/code-agent": ["../code-agent/src"],
+      "@chroma-cookbooks/agent-framework": ["../../../agent-framework/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "../code-agent" }]
+}

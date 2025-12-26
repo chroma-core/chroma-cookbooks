@@ -1,0 +1,11 @@
+{
+  "name": "@chroma-cookbooks/code-search",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "cli:dev": "pnpm --filter @code-search/cli dev"
+  }
+}
