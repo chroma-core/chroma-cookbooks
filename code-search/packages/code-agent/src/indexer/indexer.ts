@@ -62,8 +62,9 @@ export class Indexer {
         ids: batch.map((chunk) => chunk.id),
         documents: batch.map((chunk) => chunk.document),
         metadatas: batch.map((chunk) => {
-          const { id, document, ...metadata } = chunk;
-          return metadata;
+          const { id, document, symbol, ...metadata } = chunk;
+          // Only include symbol if it's defined (Chroma doesn't accept null/undefined)
+          return symbol ? { ...metadata, symbol } : metadata;
         }),
       });
     } catch (error) {

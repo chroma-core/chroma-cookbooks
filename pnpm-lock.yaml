@@ -179,6 +179,37 @@ importers:
 
   code-search: {}
 
+  code-search/packages/cli:
+    dependencies:
+      '@code-search/code-agent':
+        specifier: workspace:*
+        version: link:../code-agent
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
+      ink:
+        specifier: ^5.0.0
+        version: 5.2.1(@types/react@18.3.27)(react@18.3.1)
+      meow:
+        specifier: ^13.0.0
+        version: 13.2.0
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.27
+      tsx:
+        specifier: ^4.16.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   code-search/packages/code-agent:
     dependencies:
       '@chroma-cookbooks/agent-framework':
