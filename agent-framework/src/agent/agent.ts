@@ -27,7 +27,7 @@ import { ConsoleInputHandler } from "../services/input-handler";
 import { ConsoleStatusHandler } from "../services/status-handler";
 import { createBasePrompts } from "../services/prompts/base-prompts";
 import { LLMFactory } from "../services/llms";
-import { Tool } from "../components/executor";
+import { Tool, ToolFactory } from "../components/executor";
 import { BaseComponentConfig } from "../components";
 import { BasePlanner } from "../components/planner";
 import { BaseExecutor } from "../components/executor/base-executor";
@@ -142,12 +142,15 @@ export class BaseAgent<
     } as BaseComponentConfig<T, S>;
   }
 
-  private runtime(): Runtime<T> {
+  private runtime(runtimeTools?: (Tool | ToolFactory<T, S>)[]): Runtime<T> {
     const config = this.componentConfig();
     const { planner, executor, evaluator } = this.components;
     return {
       planner: planner(config),
-      executor: executor(config),
+      executor: executor({
+        ...config,
+        agentTools: [...config.agentTools, ...(runtimeTools || [])],
+      }),
       evaluator: evaluator(config),
     };
   }
@@ -234,13 +237,14 @@ export class BaseAgent<
     maxPlanSize,
     maxStepIterations,
     signal,
+    runtimeTools,
   }: RunConfig): Promise<AnswerOf<T>> {
     if (!query) {
       throw new AgentError("No query provided for Agent run");
     }
 
     return runContext.run({ signal }, async () => {
-      const runtime = this.runtime();
+      const runtime = this.runtime(runtimeTools);
       const { planner } = runtime;
 
       const context = this.context({

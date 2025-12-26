@@ -4,3 +4,5 @@ packages:
   - 'agentic-memory/packages/*'
   - 'agentic-search'
   - 'agentic-search/packages/*'
+  - 'code-search'
+  - 'code-search/packages/*'

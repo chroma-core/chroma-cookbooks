@@ -1,7 +1,6 @@
 import {
   BaseAgent,
   BaseAgentServices,
-  LLMServiceConfig,
 } from "@chroma-cookbooks/agent-framework";
 import {
   answerSchema,
