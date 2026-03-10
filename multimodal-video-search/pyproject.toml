@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "chromadb>=1.5.4",
+    "chromadb>=1.5.5",
     "google-genai>=1.66.0",
     "python-dotenv>=1.2.2",
     "youtube-transcript-api>=1.2.4",

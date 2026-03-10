@@ -222,7 +222,7 @@ wheels = [
 
 [[package]]
 name = "chromadb"
-version = "1.5.4"
+version = "1.5.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bcrypt" },
@@ -253,13 +253,13 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/0e/fe9f016a49dcf4bfa318b2106f3564ffa95baa955725f7ae8e074b2b2980/chromadb-1.5.4.tar.gz", hash = "sha256:d9e3284004b5222e97207f8a69366e684189c7de73d3ce2b5003f9043c8d22dd", size = 2410734, upload-time = "2026-03-08T20:08:25.91Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/6d/ab03e16be3ec663e353166f38be082efb51c0988687f8c8eee1416a7e732/chromadb-1.5.5.tar.gz", hash = "sha256:8d669285b77cc288db27583a57b2f85ba451a9b8e3bef85a260cd78e6b57be35", size = 2411397, upload-time = "2026-03-10T09:30:01.987Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/29/a0/bf31af8e513c36fe29860d7a2f465fbf5a58ec048936f061997cea55f48b/chromadb-1.5.4-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:5daf789ce4b15b84ee8f2cf6f8b17898e7d0fb859c4f65dcc5a2d3052af820f5", size = 20798815, upload-time = "2026-03-08T20:08:23.295Z" },
-    { url = "https://files.pythonhosted.org/packages/9c/b7/5676bfd0868c2018a5123056917d3276a7a499d0e6910315b45e52a3e6f3/chromadb-1.5.4-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:0d27484cc07d3f93489af8203542536ac621f8af52a2a4e590c535e5014794fc", size = 20087220, upload-time = "2026-03-08T20:08:20.628Z" },
-    { url = "https://files.pythonhosted.org/packages/1c/76/c747fd05b752ef5f489d01946c77082416141999af57bba484d15eae2586/chromadb-1.5.4-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:f37204b826b98f8561244382abf99141bc4b7bf21015dbbcf2280d771afeeb94", size = 20732448, upload-time = "2026-03-08T20:08:13.448Z" },
-    { url = "https://files.pythonhosted.org/packages/21/7f/7525519b4eb0d2940d6202b40b21eb9f17df8061fb1b280f8569d0378ae7/chromadb-1.5.4-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:be11c6d522319ee4fbe1cb8a9a11f6ba9c7f2db625a0e2ea377843bf8e5f99d5", size = 21595920, upload-time = "2026-03-08T20:08:17.741Z" },
-    { url = "https://files.pythonhosted.org/packages/3b/97/9661c772fb4e480358241eb2aa781e11f23014084ceb8a14635d6eea6dcb/chromadb-1.5.4-cp39-abi3-win_amd64.whl", hash = "sha256:18797f770c5be655e5f179336f268cccf23058e74cf62b34a6845a2ba70df2da", size = 21917281, upload-time = "2026-03-08T20:08:27.898Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/62/ee578f8ccd62928257558b13a3e7c236e402cfb319c9b201b6a75897d644/chromadb-1.5.5-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:d590998ed81164afbfb1734bb534b25ec2c9810fc1c5ce53bf8f7ac644a79887", size = 20800888, upload-time = "2026-03-10T09:29:59.546Z" },
+    { url = "https://files.pythonhosted.org/packages/f8/ce/430a87d906f79cdc7e23efcd89dd237e3dbedaf6704b40ce1da127993bf8/chromadb-1.5.5-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:5ff2912d20a82fdbf4e27ff3e1c91dab25e2ba2c629f9739bc12c11a3151aac7", size = 20091810, upload-time = "2026-03-10T09:29:56.044Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/5a/11543a76ab25c55bec6133bb98ce0dc0f4850acb36600344d8286734a051/chromadb-1.5.5-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:2f54e7736ae0eeec436a1c1fb04b77b2c6c4108996790ef16f88327e38ad13cd", size = 20740649, upload-time = "2026-03-10T09:29:49.346Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/66/e0b35c41be7c02d6fa37f6c8f61a16b7b20607ddc847574e9a5503fe853b/chromadb-1.5.5-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bb238ae508a6ce68fdd7875e040d7e5aa29d6e40fb651b51f5537b7cda789762", size = 21589423, upload-time = "2026-03-10T09:29:52.724Z" },
+    { url = "https://files.pythonhosted.org/packages/a2/df/ce1ffcc0ad3eef8bd35b920809b990e6925ba94b2580dc5bd7ccde0fc06a/chromadb-1.5.5-cp39-abi3-win_amd64.whl", hash = "sha256:3953403b63bb1c05405d10db36d183c4d19a027938c15898510d11943499046f", size = 21915873, upload-time = "2026-03-10T09:30:21.349Z" },
 ]
 
 [[package]]
@@ -770,7 +770,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "chromadb", specifier = ">=1.5.4" },
+    { name = "chromadb", specifier = ">=1.5.5" },
     { name = "google-genai", specifier = ">=1.66.0" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "youtube-transcript-api", specifier = ">=1.2.4" },

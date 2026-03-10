@@ -77,12 +77,12 @@ def build_tool_response(video_id: str, results: list[dict]) -> types.Content:
 
         if result_type == "transcript":
             parts.append(types.Part.from_text(
-                f"[Transcript at {timestamp}, {frame}]: {result.get('text', '')}"
+                text=f"[Transcript at {timestamp}, {frame}]: {result.get('text', '')}"
             ))
         else:
             # Image result - include the actual image
             parts.append(types.Part.from_text(
-                f"[Image at {timestamp}, {frame}]:"
+                text=f"[Image at {timestamp}, {frame}]:"
             ))
 
             # Load image from Files API if available, otherwise from local
@@ -134,7 +134,7 @@ When answering questions:
 Be thorough but efficient - search for what you need, then answer."""
 
     messages = [
-        types.Content(role="user", parts=[types.Part.from_text(question)])
+        types.Content(role="user", parts=[types.Part.from_text(text=question)])
     ]
 
     for iteration in range(max_iterations):

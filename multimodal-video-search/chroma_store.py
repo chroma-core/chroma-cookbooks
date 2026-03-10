@@ -1,7 +1,7 @@
 """Chroma Cloud storage for multimodal video data."""
 
 import chromadb
-from chromadb.utils.embedding_functions import GoogleGenerativeAiEmbeddingFunction
+from chromadb.utils.embedding_functions import GoogleGeminiEmbeddingFunction
 
 from config import (
     GEMINI_API_KEY,
@@ -21,7 +21,6 @@ def get_chroma_client() -> chromadb.CloudClient:
     global _client
     if _client is None:
         _client = chromadb.CloudClient(
-            host=CHROMA_HOST,
             api_key=CHROMA_API_KEY,
             tenant=CHROMA_TENANT,
             database=CHROMA_DATABASE,
@@ -30,9 +29,9 @@ def get_chroma_client() -> chromadb.CloudClient:
 
 
 def get_embedding_function():
-    return GoogleGenerativeAiEmbeddingFunction(
-        api_key=GEMINI_API_KEY,
+    return GoogleGeminiEmbeddingFunction(
         model_name=EMBEDDING_MODEL,
+        task_type="RETRIEVAL_DOCUMENT",
     )
 
 

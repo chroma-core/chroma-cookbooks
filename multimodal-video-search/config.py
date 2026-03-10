@@ -12,8 +12,8 @@ CHROMA_TENANT = os.getenv("CHROMA_TENANT")
 CHROMA_DATABASE = os.getenv("CHROMA_DATABASE")
 
 # Models
-EMBEDDING_MODEL = "gemini-embedding-2-exp-11-2025"
-LLM_MODEL = "gemini-3.1-pro"
+EMBEDDING_MODEL = "gemini-embedding-2-preview"
+LLM_MODEL = "gemini-3.1-pro-preview"
 
 # Settings
 EMBED_BATCH_SIZE = 5
